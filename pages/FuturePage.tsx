@@ -1,10 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FloatingHeader } from '../components/landing/FloatingHeader';
 import { Footer } from '../components/landing/Footer';
 import { LanguageType } from '../types';
 
 const FuturePage: React.FC = () => {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [activeLayer, setActiveLayer] = useState<number | null>(null);
 
@@ -164,7 +165,7 @@ const FuturePage: React.FC = () => {
              <div className="absolute inset-0 flex flex-col items-center justify-center gap-10">
                 <div className="text-center space-y-4 animate-fadeIn">
                    <div className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.5em] mb-4">Core Philosophy</div>
-                   <div className="text-4xl font-black text-white italic font-serif">"Continuous <br/>Simulation"</div>
+                   <div className="text-4xl font-black text-white italic font-serif">"Continuous <br />Simulation"</div>
                    <div className="text-[10px] text-slate-600 font-mono mt-4">REPLACING REQUEST / RESPONSE</div>
                 </div>
              </div>
@@ -206,30 +207,21 @@ const FuturePage: React.FC = () => {
 
       {/* Conclusion CTA */}
       <section className="py-40 px-8 text-center max-w-4xl mx-auto space-y-12">
-        <h2 className="text-5xl font-black text-white tracking-tighter">Ready to become <br/> a Future Architect?</h2>
+        <h2 className="text-5xl font-black text-white tracking-tighter">Ready to become <br /> a Future Architect?</h2>
         <p className="text-slate-500 text-lg font-light leading-relaxed">
           The Triad (Zig, Elixir, Rust) bukan hanya bahasa pemrograman. Mereka adalah alat bertahan hidup untuk membangun sistem yang tidak akan hancur oleh kompleksitas era spasial dan neural.
         </p>
         <div className="flex flex-wrap justify-center gap-6">
-          <button onClick={() => window.location.href='#/blueprints'} className="px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-indigo-600/20 hover:bg-indigo-500 transition-all active:scale-95">
+          <button onClick={() => navigate('/blueprints')} className="px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-indigo-600/20 hover:bg-indigo-500 transition-all active:scale-95">
             Eksplorasi Blueprints
           </button>
-          <button onClick={() => window.location.href='#/lab/rust'} className="px-10 py-5 bg-white text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 transition-all active:scale-95">
+          <button onClick={() => navigate('/lab/rust')} className="px-10 py-5 bg-white text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 transition-all active:scale-95">
             Mulai Belajar
           </button>
         </div>
       </section>
 
       <Footer />
-      <style>{`
-        .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
-        }
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };

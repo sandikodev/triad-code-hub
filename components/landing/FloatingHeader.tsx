@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LanguageType } from '../../types';
@@ -49,6 +48,7 @@ export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, active
             <button 
               key={item.label}
               onClick={() => handleNavClick(item.id)} 
+              data-tooltip={`Buka ${item.label}`}
               className={`relative text-[10px] font-bold uppercase tracking-[0.2em] transition-all group ${
                 location.pathname.includes(item.id) ? 'text-indigo-400' : 'text-slate-400 hover:text-white'
               }`}
@@ -63,11 +63,11 @@ export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, active
           <div className="relative group">
             <button 
               onClick={() => navigate(`/lab/${activeRoadmap.toLowerCase()}`)}
+              data-tooltip="Buka Lab Interaktif Sekarang"
               className="px-6 py-2.5 rounded-xl bg-white text-slate-950 text-[10px] font-black uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-xl active:scale-95"
             >
               Akses Lab
             </button>
-            <div className="premium-tooltip">Buka Lab Interaktif Sekarang</div>
           </div>
         </div>
       </div>

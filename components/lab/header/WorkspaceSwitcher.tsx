@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LanguageType } from '../../../types';
 import { LANGUAGES } from '../../../constants';
@@ -18,6 +17,7 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ currentLan
             <button
               onClick={() => handleLangChange(l.id as LanguageType)}
               aria-pressed={currentLang === l.id}
+              data-tooltip={`Ganti ke ${l.name}`}
               className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-tighter transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 currentLang === l.id 
                   ? 'bg-indigo-600 text-white shadow-lg' 
@@ -26,7 +26,6 @@ export const WorkspaceSwitcher: React.FC<WorkspaceSwitcherProps> = ({ currentLan
             >
               {l.name}
             </button>
-            <div className="premium-tooltip">Ganti ke {l.name}</div>
           </div>
         ))}
       </div>

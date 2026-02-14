@@ -100,34 +100,48 @@
         animation: shimmer 2s infinite;
       }
       
-      /* Premium Tooltip Style */
-      .premium-tooltip {
+      /* UNIVERSAL HIGH-PERFORMANCE TOOLTIP */
+      .global-premium-tooltip {
         pointer-events: none;
         position: fixed !important;
-        z-index: 9999 !important;
-        inset: auto !important;
-        left: var(--mouse-x, 0) !important;
-        top: var(--mouse-y, 0) !important;
-        padding: 0.5rem 0.75rem;
-        background: #1e1b4b;
-        border: 1px solid rgba(99, 102, 241, 0.3);
+        z-index: 99999999 !important;
+        max-width: 280px;
+        padding: 0.75rem 1rem;
+        background: rgba(15, 23, 42, 0.98);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(99, 102, 241, 0.5);
         color: #e0e7ff;
-        font-size: 0.65rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        border-radius: 0.5rem;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-        white-space: nowrap;
+        font-size: 0.7rem;
+        font-weight: 500;
+        line-height: 1.5;
+        border-radius: 1rem;
+        box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(99, 102, 241, 0.15);
         opacity: 0;
         visibility: hidden;
-        transform: translate(15px, 15px) !important;
-        transition: opacity 0.15s ease-out, visibility 0.15s ease-out;
-        will-change: left, top;
+        transition: opacity 0.1s ease-out, visibility 0.1s ease-out;
+        will-change: transform, opacity;
+        top: 0;
+        left: 0;
+        white-space: normal;
+        text-align: left;
       }
-      .group:hover > .premium-tooltip {
+
+      .global-premium-tooltip.visible {
         opacity: 1;
         visibility: visible;
+      }
+
+      .global-premium-tooltip .tooltip-label {
+        display: block;
+        font-size: 0.55rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #818cf8;
+        margin-bottom: 0.35rem;
+        border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        padding-bottom: 0.25rem;
       }
 
       /* Mermaid custom styling */
@@ -172,7 +186,6 @@
       mermaid.initialize({
         startOnLoad: false,
         theme: 'dark',
-        securityLevel: 'loose',
         themeVariables: {
           primaryColor: '#6366f1',
           primaryTextColor: '#fff',

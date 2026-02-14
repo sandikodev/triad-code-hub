@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { LanguageInfo } from '../types';
 
@@ -20,6 +19,12 @@ export const LanguageCard: React.FC<LanguageCardProps> = ({ info, onSelect, isAc
     }
   };
 
+  const tooltipText = isSoon 
+    ? `Blueprint ${info.name} Terkunci` 
+    : isPro 
+      ? `Butuh Architect Pro` 
+      : `Akses Dasar Gratis`;
+
   return (
     <div 
       onClick={() => !isSoon && onSelect(info.id)}
@@ -29,6 +34,7 @@ export const LanguageCard: React.FC<LanguageCardProps> = ({ info, onSelect, isAc
       aria-pressed={isActive}
       aria-disabled={isSoon}
       aria-label={isSoon ? `${info.name} segera hadir` : `Pilih jalur belajar ${info.name}`}
+      data-tooltip={tooltipText}
       className={`relative group transition-all duration-500 p-6 rounded-2xl border-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
         isSoon 
           ? 'border-slate-800/50 bg-slate-900/30 cursor-not-allowed opacity-60 grayscale' 
@@ -87,11 +93,6 @@ export const LanguageCard: React.FC<LanguageCardProps> = ({ info, onSelect, isAc
           Lab Locked
         </div>
       )}
-
-      {/* Premium Tooltip */}
-      <div className="premium-tooltip top-0 left-1/2 -translate-x-1/2 -translate-y-full mb-4">
-        {isSoon ? `Blueprint ${info.name} Terkunci` : isPro ? `Butuh Architect Pro` : `Akses Dasar Gratis`}
-      </div>
     </div>
   );
 };

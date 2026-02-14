@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { LanguageType, RoadmapStep } from '../types';
 import { getRoadmap, getConceptCodeExample } from '../services/geminiService';
@@ -129,15 +128,6 @@ export const Roadmap: React.FC<RoadmapProps> = ({ language }) => {
                   <div className="h-4 bg-slate-800/60 rounded w-full animate-pulse" />
                   <div className="h-4 bg-slate-800/60 rounded w-5/6 animate-pulse" />
                 </div>
-                
-                <div className="pt-6 border-t border-slate-800/50">
-                   <div className="h-2 bg-slate-800/40 rounded w-20 mb-4 animate-pulse" />
-                   <div className="flex flex-wrap gap-3">
-                     {[1, 2, 3].map(c => (
-                       <div key={c} className="h-8 bg-slate-800/60 rounded-xl w-24 animate-pulse" />
-                     ))}
-                   </div>
-                </div>
               </div>
             </div>
           ))}
@@ -169,18 +159,6 @@ export const Roadmap: React.FC<RoadmapProps> = ({ language }) => {
           >
             Retry Link
           </button>
-          
-          {error === "QUOTA_EXCEEDED" && (
-            <button 
-              onClick={openKeyManager}
-              className="px-10 py-4 bg-white text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl hover:bg-indigo-50 active:scale-95 flex items-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-              </svg>
-              Update API Key
-            </button>
-          )}
         </div>
       </div>
     );
@@ -264,25 +242,22 @@ export const Roadmap: React.FC<RoadmapProps> = ({ language }) => {
                         <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-3">Core Blueprint</h4>
                         <div className="flex flex-wrap gap-3">
                           {step.concepts.map((concept, ci) => (
-                            <div key={ci} className="relative group/tooltip">
-                              <button 
-                                onClick={(e) => handleConceptClick(e, concept.name)}
-                                className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-widest border transition-all duration-300 group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
-                                  bg-slate-950 border-slate-800 text-indigo-400 hover:border-indigo-400 hover:bg-indigo-500 hover:text-white hover:scale-105 active:scale-95
-                                `}
-                              >
-                                <span className="flex items-center gap-2">
-                                  {concept.name}
-                                  <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="h-3 w-3 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                                  </svg>
-                                </span>
-                              </button>
-                              <div className="premium-tooltip bottom-full left-1/2 -translate-x-1/2 mb-3 w-56 !whitespace-normal text-center leading-relaxed text-[10px] lowercase tracking-normal font-medium py-3 px-4 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.8)] pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/tooltip:translate-y-0 border-indigo-500/50 bg-[#0c0e1a]">
-                                <span className="block text-indigo-400 font-black uppercase text-[8px] tracking-[0.2em] mb-1.5">Arsitektur Node</span>
-                                {concept.definition}
-                              </div>
-                            </div>
+                            <button 
+                              key={ci}
+                              onClick={(e) => handleConceptClick(e, concept.name)}
+                              data-tooltip={concept.definition}
+                              data-tooltip-label="Definisi Konsep"
+                              className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-widest border transition-all duration-300 group/btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
+                                bg-slate-950 border-slate-800 text-indigo-400 hover:border-indigo-400 hover:bg-indigo-500 hover:text-white hover:scale-105 active:scale-95
+                              `}
+                            >
+                              <span className="flex items-center gap-2 pointer-events-none">
+                                {concept.name}
+                                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="h-3 w-3 opacity-0 group-hover/btn:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                              </span>
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -294,7 +269,7 @@ export const Roadmap: React.FC<RoadmapProps> = ({ language }) => {
                             className="flex items-center gap-2 text-[10px] font-bold text-indigo-400/70 hover:text-indigo-400 uppercase tracking-widest transition-colors focus:outline-none"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 transition-transform duration-300 ${isRelatedExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                             </svg>
                             {isRelatedExpanded ? 'Hide Related Paradigms' : 'Show Related Paradigms'}
                           </button>
@@ -302,18 +277,15 @@ export const Roadmap: React.FC<RoadmapProps> = ({ language }) => {
                           <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isRelatedExpanded ? 'max-h-60 opacity-100 mt-4' : 'max-h-0 opacity-0'}`}>
                             <div className="flex flex-wrap gap-2">
                               {step.relatedConcepts.map((rConcept, ri) => (
-                                <div key={ri} className="relative group/tooltip">
-                                  <button
-                                    onClick={(e) => handleConceptClick(e, rConcept.name)}
-                                    className="px-3 py-1 rounded-lg bg-indigo-500/5 border border-indigo-500/10 text-indigo-300/60 text-[10px] hover:text-indigo-300 hover:border-indigo-500/30 transition-all focus:outline-none"
-                                  >
-                                    {rConcept.name}
-                                  </button>
-                                  <div className="premium-tooltip bottom-full left-1/2 -translate-x-1/2 mb-3 w-48 !whitespace-normal text-center leading-relaxed text-[9px] lowercase tracking-normal font-medium py-2 px-3 shadow-2xl pointer-events-none opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 transform translate-y-2 group-hover/tooltip:translate-y-0 border-purple-500/30 bg-[#0c0e1a]">
-                                    <span className="block text-purple-400 font-black uppercase text-[7px] tracking-[0.2em] mb-1">Paradigma</span>
-                                    {rConcept.definition}
-                                  </div>
-                                </div>
+                                <button
+                                  key={ri}
+                                  onClick={(e) => handleConceptClick(e, rConcept.name)}
+                                  data-tooltip={rConcept.definition}
+                                  data-tooltip-label="Paradigma"
+                                  className="px-3 py-1 rounded-lg bg-indigo-500/5 border border-indigo-500/10 text-indigo-300/60 text-[10px] hover:text-indigo-300 hover:border-indigo-500/30 transition-all focus:outline-none"
+                                >
+                                  {rConcept.name}
+                                </button>
                               ))}
                             </div>
                           </div>

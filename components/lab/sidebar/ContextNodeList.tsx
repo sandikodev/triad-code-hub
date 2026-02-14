@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export const ContextNodeList: React.FC = () => {
@@ -14,10 +13,12 @@ export const ContextNodeList: React.FC = () => {
       <div className="space-y-2">
         {nodes.map((node, nIdx) => (
           <div key={nIdx} className="relative group">
-            <button className="w-full text-left p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+            <button 
+              data-tooltip={node.tip}
+              className="w-full text-left p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            >
               {node.label}
             </button>
-            <div className="premium-tooltip">{node.tip}</div>
           </div>
         ))}
       </div>

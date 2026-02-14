@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -62,23 +61,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ heroTexts, heroTextIdx
           <div className="relative group">
             <button 
               onClick={() => scrollTo('lab')}
+              data-tooltip="Jelajahi Kurikulum Masteri"
               className="relative px-12 py-5 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-indigo-500/30"
             >
               <span className="relative z-10">Mulai Eksplorasi</span>
               <div className="absolute inset-0 bg-gradient-to-r from-indigo-400 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
-            <div className="premium-tooltip">Jelajahi Kurikulum Masteri</div>
           </div>
           
           <div className="relative group">
             <button 
               onClick={() => navigate('/setup')}
+              data-tooltip="Konfigurasi Nix & IDE"
               className="px-12 py-5 bg-slate-900 border border-slate-800 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-800 transition-all flex items-center gap-3 border-white/5"
             >
               <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
               Setup Workspace
             </button>
-            <div className="premium-tooltip">Konfigurasi Nix & IDE</div>
           </div>
         </div>
       </div>

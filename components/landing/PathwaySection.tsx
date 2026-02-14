@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LanguageType } from '../../types';
@@ -50,17 +49,18 @@ export const PathwaySection: React.FC<PathwaySectionProps> = ({ activeRoadmap, s
               </div>
               <h3 className="text-4xl font-bold text-left">Langkah Masteri {activeRoadmap}</h3>
             </div>
-            <div className="relative group">
+            <div className="relative">
               <button 
                 onClick={() => navigate(`/lab/${activeRoadmap.toLowerCase()}`)}
-                className="px-8 py-4 bg-indigo-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-500 transition-all flex items-center gap-4 shadow-2xl shadow-indigo-500/20"
+                data-tooltip={`Buka Lab Interaktif ${activeRoadmap}`}
+                data-tooltip-label="Akses Cepat"
+                className="px-8 py-4 bg-indigo-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-500 transition-all flex items-center gap-4 shadow-2xl shadow-indigo-500/20 active:scale-95"
               >
                 Eksplorasi di Lab
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
               </button>
-              <div className="premium-tooltip">Masuk ke Lab {activeRoadmap}</div>
             </div>
           </div>
           <Roadmap language={activeRoadmap} />
