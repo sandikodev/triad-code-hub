@@ -79,6 +79,19 @@ const STATIC_ROADMAPS: Record<string, RoadmapStep[]> = {
         { name: "Hot Reloading", definition: "Updating production code without stopping the running system." }
       ]
     }
+  ],
+  [LanguageType.CARBON]: [
+    {
+      title: "Bidirectional Interoperability",
+      description: "The unique value proposition of Carbon: calling C++ from Carbon and vice-versa.",
+      concepts: [
+        { name: "C++ Interop", definition: "Native capability to use existing C++ libraries without wrappers." },
+        { name: "Migration Paths", definition: "Step-by-step tool-assisted migration from legacy C++ codebases." }
+      ],
+      relatedConcepts: [
+        { name: "Modern ABI", definition: "Clean binary interfaces for better performance and toolability." }
+      ]
+    }
   ]
 };
 
@@ -106,11 +119,11 @@ export const getGeminiResponse = async (prompt: string, context: LanguageType | 
   // Using gemini-3-flash-preview for general chat to maximize quota availability
   const model = 'gemini-3-flash-preview';
 
-  const systemInstruction = `Anda adalah "Architectural Mentor" tingkat dunia yang mengkhususkan diri pada Zig, Elixir, dan Rust. 
+  const systemInstruction = `Anda adalah "Architectural Mentor" tingkat dunia yang mengkhususkan diri pada Zig, Elixir, Rust, dan bahasa masa depan lainnya. 
     Konteks saat ini: ${context}. 
     
     FILOSOFI ANDA:
-    1. Anda percaya bahwa teknologi baru seperti Zig/Rust/Elixir tidak untuk mengganti bahasa lama secara brutal, melainkan untuk merevolusi arsitektur secara bertahap.
+    1. Anda percaya bahwa teknologi baru seperti Zig/Rust/Elixir/Carbon tidak untuk mengganti bahasa lama secara brutal, melainkan untuk merevolusi arsitektur secara bertahap.
     2. Anda sangat paham tentang Edge Web Technologies, Spatial Computing (AR/VR), dan Brain-Computer Interface (BCI).
     3. Anda menekankan pada presisi runtime, efisiensi compiler, dan keamanan memori sebagai fondasi masa depan.
     4. Berikan jawaban yang "wise", edukatif namun tetap teknis mendalam.

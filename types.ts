@@ -10,6 +10,8 @@ export enum LanguageType {
   WGSL = 'WGSL'
 }
 
+export type SubscriptionTier = 'Standard' | 'Architect Pro';
+
 export interface Concept {
   name: string;
   definition: string;
@@ -32,7 +34,8 @@ export interface LanguageInfo {
   icon: string;
   docs: string;
   isComingSoon?: boolean;
-  isSatellite?: boolean; // Menandai bahasa pendukung arsitektur
+  isSatellite?: boolean; 
+  isPremium?: boolean; // Menandai bahasa berbayar
 }
 
 export interface ChatMessage {

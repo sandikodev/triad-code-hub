@@ -33,7 +33,7 @@ const FuturePage: React.FC = () => {
       title: "Spatial Runtime Layer",
       subtitle: "Universal Simulation",
       description: "Rendering universal yang mengonvergensi pipeline GPU antara browser (WebXR) dan native hardware.",
-      tech: ["WGSL", "C++", "Carbon", "WGSL"],
+      tech: ["WGSL", "C++", "Carbon", "WebGPU"],
       color: "border-indigo-500/50 shadow-indigo-500/10"
     },
     {
