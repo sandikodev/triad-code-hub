@@ -7,7 +7,7 @@ interface ChatContextType {
   messages: ChatMessage[];
   isLoading: boolean;
   feedbackHistory: Record<string, 'positive' | 'negative'>;
-  sendMessage: (content: string, language: LanguageType | 'General') => Promise<void>;
+  sendMessage: (content: string, language: LanguageType | 'General', isRetry?: boolean) => Promise<void>;
   handleFeedback: (messageId: string, rating: 'positive' | 'negative') => void;
   setMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>;
 }
@@ -16,41 +16,83 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
-export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [feedbackHistory, setFeedbackHistory] = useState<Record<string, 'positive' | 'negative'>>({});
+const STORAGE_KEY_MESSAGES = 'triadhub_chat_messages';
+const STORAGE_KEY_FEEDBACK = 'triadhub_chat_feedback';
 
-  useEffect(() => {
-    const storedFeedback = localStorage.getItem('triadhub_chat_feedback');
-    if (storedFeedback) {
-      try {
-        setFeedbackHistory(JSON.parse(storedFeedback));
-      } catch (e) {
-        console.error("Failed to load feedback history", e);
+export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Initialize messages from localStorage
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_MESSAGES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Ensure timestamps are converted back to Date objects
+        return parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp)
+        }));
       }
+    } catch (e) {
+      console.error("Failed to load chat messages from localStorage", e);
     }
-  }, []);
+    return [];
+  });
+  
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Initialize feedback history from localStorage
+  const [feedbackHistory, setFeedbackHistory] = useState<Record<string, 'positive' | 'negative'>>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_FEEDBACK);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error("Failed to load feedback history from localStorage", e);
+    }
+    return {};
+  });
+
+  // Persist messages to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify(messages));
+    } catch (e) {
+      console.error("Failed to save chat messages to localStorage", e);
+    }
+  }, [messages]);
 
   const handleFeedback = useCallback((messageId: string, rating: 'positive' | 'negative') => {
     setFeedbackHistory(prev => {
       const newHistory = { ...prev, [messageId]: rating };
-      localStorage.setItem('triadhub_chat_feedback', JSON.stringify(newHistory));
+      try {
+        localStorage.setItem(STORAGE_KEY_FEEDBACK, JSON.stringify(newHistory));
+      } catch (e) {
+        console.error("Failed to save feedback to localStorage", e);
+      }
       return newHistory;
     });
   }, []);
 
-  const sendMessage = useCallback(async (content: string, language: LanguageType | 'General') => {
+  const sendMessage = useCallback(async (content: string, language: LanguageType | 'General', isRetry: boolean = false) => {
     if (!content.trim() || isLoading) return;
 
-    const userMessage: ChatMessage = {
-      id: generateId(),
-      role: 'user',
-      content: content,
-      timestamp: new Date()
-    };
+    if (!isRetry) {
+      const userMessage: ChatMessage = {
+        id: generateId(),
+        role: 'user',
+        content: content,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, userMessage]);
+    } else {
+      // If it's a retry, remove the last error message from the history to replace it
+      setMessages(prev => {
+        if (prev.length > 0 && prev[prev.length - 1].isError) {
+          return prev.slice(0, -1);
+        }
+        return prev;
+      });
+    }
 
-    setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
 
     try {
@@ -62,8 +104,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         timestamp: new Date()
       };
       setMessages(prev => [...prev, modelMessage]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to send message", error);
+      
+      let errorText = "Gagal menghubungkan ke Arsitektur AI. Sinyal terputus atau terjadi gangguan pada tautan blueprint.";
+      if (error?.message?.includes('429') || error?.message?.includes('quota')) {
+        errorText = "Sistem sedang mengalami beban tinggi (Quota Exceeded). Silakan coba sesaat lagi.";
+      }
+
+      const errorMessage: ChatMessage = {
+        id: generateId(),
+        role: 'model',
+        content: errorText,
+        timestamp: new Date(),
+        isError: true
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }

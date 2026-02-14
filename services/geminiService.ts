@@ -128,10 +128,7 @@ export const getGeminiResponse = async (prompt: string, context: LanguageType | 
     return response.text || "Mohon maaf, blueprint arsitektur tidak dapat dihasilkan saat ini.";
   } catch (error: any) {
     console.error("Gemini API Error:", error);
-    if (error?.message?.includes('429') || error?.message?.includes('quota')) {
-      return "Sistem sedang mengalami beban tinggi (Quota Exceeded). Silakan coba sesaat lagi.";
-    }
-    return "Terjadi gangguan pada sistem tautan AI. Silakan coba kembali.";
+    throw error;
   }
 };
 

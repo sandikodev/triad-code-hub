@@ -74,6 +74,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
     await sendMessage(textToSend, currentLanguage);
   };
 
+  const handleRetry = async () => {
+    if (isLoading) return;
+    
+    // Find the last user message to retry
+    const userMessages = messages.filter(m => m.role === 'user');
+    if (userMessages.length === 0) return;
+    
+    const lastUserMsg = userMessages[userMessages.length - 1];
+    await sendMessage(lastUserMsg.content, currentLanguage, true);
+  };
+
   const renderContent = (content: string) => {
     const parts = content.split(/(```[\s\S]*?```)/g);
     
@@ -128,19 +139,37 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
             <div className={`max-w-[90%] md:max-w-[85%] relative group ${
               msg.role === 'user' 
                 ? 'bg-indigo-600 p-4 rounded-2xl text-white rounded-br-none shadow-lg' 
-                : 'bg-transparent text-slate-300'
+                : msg.isError 
+                  ? 'bg-rose-500/10 border border-rose-500/20 p-6 rounded-2xl text-slate-300'
+                  : 'bg-transparent text-slate-300'
             }`}>
               {msg.role === 'model' && (
-                <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-4 flex items-center gap-2" aria-hidden="true">
-                  <div className="w-4 h-0.5 bg-indigo-500"></div> Architectural AI
+                <div className={`text-[10px] font-bold uppercase tracking-widest mb-4 flex items-center gap-2 ${msg.isError ? 'text-rose-400' : 'text-indigo-400'}`} aria-hidden="true">
+                  <div className={`w-4 h-0.5 ${msg.isError ? 'bg-rose-500' : 'bg-indigo-500'}`}></div> 
+                  {msg.isError ? 'Link Error' : 'Architectural AI'}
                 </div>
               )}
               <div className={`text-sm leading-relaxed ${msg.role === 'model' ? 'font-light' : 'font-medium'}`}>
                 {renderContent(msg.content)}
               </div>
 
+              {/* Retry Mechanism for Errors */}
+              {msg.isError && (
+                <div className="mt-6 flex flex-col items-start gap-4">
+                  <button 
+                    onClick={handleRetry}
+                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95 group/retry"
+                  >
+                    <svg className="w-3.5 h-3.5 transition-transform group-hover/retry:rotate-180 duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Retry Architectural Link
+                  </button>
+                </div>
+              )}
+
               {/* Feedback Mechanism */}
-              {msg.role === 'model' && (
+              {msg.role === 'model' && !msg.isError && (
                 <div className="mt-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Rate response:</span>
                   <div className="flex items-center gap-2">
@@ -181,6 +210,26 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
 
       <div className={`p-8 relative ${isLabView ? 'max-w-4xl mx-auto w-full' : 'bg-slate-800 border-t border-slate-700'}`} ref={inputContainerRef}>
         
+        {/* Quick Start Commands - Shown only at the start of a conversation */}
+        {!input.trim() && !isLoading && messages.length <= 1 && (
+          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-6 px-2 -mx-2">
+            {(SUGGESTIONS[currentLanguage] || SUGGESTIONS["General"]).map((suggestion, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSend(suggestion)}
+                className="whitespace-nowrap px-5 py-3 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 text-[10px] font-black text-indigo-400/70 hover:text-indigo-400 hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-all uppercase tracking-[0.15em] flex-shrink-0 shadow-sm"
+              >
+                <span className="flex items-center gap-2">
+                  <svg className="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  {suggestion}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Auto-Suggestions Panel */}
         {showSuggestions && filteredSuggestions.length > 0 && (
           <div className="absolute bottom-full left-8 right-8 mb-4 bg-[#0c0e1a]/95 backdrop-blur-2xl border border-indigo-500/30 rounded-2xl shadow-2xl overflow-hidden animate-fadeIn z-[100]">
@@ -239,6 +288,16 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
            Secure Lab Environment – End-to-End Encryption Enabled
         </p>
       </div>
+
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };
