@@ -128,6 +128,10 @@ export const getGeminiResponse = async (prompt: string, context: LanguageType | 
     return response.text || "Mohon maaf, blueprint arsitektur tidak dapat dihasilkan saat ini.";
   } catch (error: any) {
     console.error("Gemini API Error:", error);
+    // Standardizing quota error for UI detection
+    if (error?.message?.includes('429') || error?.message?.includes('quota') || error?.status === 'RESOURCE_EXHAUSTED') {
+      throw new Error("QUOTA_EXCEEDED");
+    }
     throw error;
   }
 };
@@ -202,13 +206,12 @@ export const getRoadmap = async (language: LanguageType): Promise<RoadmapStep[]>
   } catch (error: any) {
     console.warn("Roadmap Generation failed, attempting fallback...", error);
     
-    // 3. Fallback logic: check for static data if API fails (e.g. 429 quota exhausted)
-    if (STATIC_ROADMAPS[language]) {
-      console.info(`Using static fallback roadmap for ${language}`);
-      return STATIC_ROADMAPS[language];
-    }
-
-    if (error?.message?.includes('429') || error?.message?.includes('quota')) {
+    if (error?.message?.includes('429') || error?.message?.includes('quota') || error?.status === 'RESOURCE_EXHAUSTED') {
+      // 3. Fallback logic: check for static data if API fails (e.g. 429 quota exhausted)
+      if (STATIC_ROADMAPS[language]) {
+        console.info(`Using static fallback roadmap for ${language}`);
+        return STATIC_ROADMAPS[language];
+      }
       throw new Error("QUOTA_EXCEEDED");
     }
     return [];
@@ -233,8 +236,8 @@ export const getConceptCodeExample = async (language: LanguageType, concept: str
     return response.text || "Dokumentasi teknis tidak ditemukan.";
   } catch (error: any) {
     console.error("Concept Code Fetch Error:", error);
-    if (error?.message?.includes('429')) {
-      return "Sistem sedang sibuk (Quota Exceeded). Silakan coba lagi nanti.";
+    if (error?.message?.includes('429') || error?.message?.includes('quota') || error?.status === 'RESOURCE_EXHAUSTED') {
+      return "SISTEM_QUOTA_EXCEEDED";
     }
     return "Gagal memuat blueprint kode.";
   }

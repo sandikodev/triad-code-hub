@@ -82,7 +82,7 @@ const TutorLab: React.FC = () => {
       {/* Main Content Area */}
       <main className="flex-1 flex overflow-hidden">
         {/* Left Panel: Info & Tools */}
-        <aside className="w-80 border-r border-slate-800 p-6 flex flex-col gap-8 bg-slate-950 overflow-y-auto hidden lg:flex" aria-label="Informasi Bahasa dan Alat Bantu">
+        <aside className="w-80 border-r border-slate-800 p-6 flex flex-col gap-8 bg-slate-950 overflow-y-auto overflow-x-hidden hidden lg:flex" aria-label="Informasi Bahasa dan Alat Bantu">
           <div className="space-y-4">
             <div className={`w-12 h-12 rounded-xl ${langInfo.color} flex items-center justify-center text-2xl shadow-xl`} aria-hidden="true">
                {langInfo.icon}
@@ -105,7 +105,7 @@ const TutorLab: React.FC = () => {
                   <button className="w-full text-left p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/50 transition-all text-xs font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
                     {node.label}
                   </button>
-                  <div className="premium-tooltip left-full ml-4">{node.tip}</div>
+                  <div className="premium-tooltip bottom-full left-0 mb-2">{node.tip}</div>
                 </div>
               ))}
             </div>

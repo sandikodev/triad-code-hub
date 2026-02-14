@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { LanguageType, RoadmapStep } from '../types';
 import { getRoadmap, getConceptCodeExample } from '../services/geminiService';
 import { CodeModal } from './CodeModal';
+import { useAuth } from '../context/AuthContext';
 
 interface RoadmapProps {
   language: LanguageType;
@@ -16,6 +17,8 @@ export const Roadmap: React.FC<RoadmapProps> = ({ language }) => {
   const [expandedSteps, setExpandedSteps] = useState<Set<number>>(new Set());
   const [expandedRelated, setExpandedRelated] = useState<Set<number>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  const { openKeyManager } = useAuth();
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -80,7 +83,11 @@ export const Roadmap: React.FC<RoadmapProps> = ({ language }) => {
     setModalContent('');
     
     const content = await getConceptCodeExample(language, concept);
-    setModalContent(content);
+    if (content === "SISTEM_QUOTA_EXCEEDED") {
+      setModalContent("Mohon maaf, kuota API Gemini telah habis (429 Quota Exceeded). Silakan gunakan API Key pribadi Anda melalui menu Identity atau Setup Environment untuk melanjutkan akses blueprint tanpa hambatan.");
+    } else {
+      setModalContent(content);
+    }
     setModalLoading(false);
   };
 
@@ -155,12 +162,26 @@ export const Roadmap: React.FC<RoadmapProps> = ({ language }) => {
             ? "Batas penggunaan API Gemini Anda telah tercapai. Silakan coba kembali dalam beberapa menit atau periksa kuota API Key Anda." 
             : "Gagal menghubungkan ke pusat arsitektur AI. Periksa koneksi internet Anda dan coba lagi."}
         </p>
-        <button 
-          onClick={fetchRoadmap}
-          className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 active:scale-95"
-        >
-          Retry Link
-        </button>
+        <div className="flex flex-wrap justify-center gap-4">
+          <button 
+            onClick={fetchRoadmap}
+            className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl shadow-indigo-500/20 active:scale-95"
+          >
+            Retry Link
+          </button>
+          
+          {error === "QUOTA_EXCEEDED" && (
+            <button 
+              onClick={openKeyManager}
+              className="px-10 py-4 bg-white text-slate-950 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl hover:bg-indigo-50 active:scale-95 flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+              </svg>
+              Update API Key
+            </button>
+          )}
+        </div>
       </div>
     );
   }

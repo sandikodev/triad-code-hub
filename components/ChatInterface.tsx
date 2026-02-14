@@ -3,8 +3,11 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { LanguageType, ChatMessage } from '../types';
 import { SUGGESTIONS } from '../constants';
 import { useChat } from '../context/ChatContext';
+import { useAuth } from '../context/AuthContext';
 
 declare var Prism: any;
+declare var renderMathInElement: any;
+declare var mermaid: any;
 
 interface ChatInterfaceProps {
   currentLanguage: LanguageType | 'General';
@@ -21,10 +24,27 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
     setMessages 
   } = useChat();
   
+  const { openKeyManager } = useAuth();
+  
   const [input, setInput] = useState('');
+  const [debouncedInput, setDebouncedInput] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isUserTyping, setIsUserTyping] = useState(false);
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounce input for suggestions
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedInput(input);
+    }, 300);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [input]);
 
   // Initialize welcome message if messages are empty
   useEffect(() => {
@@ -40,19 +60,44 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
 
   const filteredSuggestions = useMemo(() => {
     const list = SUGGESTIONS[currentLanguage] || SUGGESTIONS["General"];
-    if (!input.trim()) return [];
-    const query = input.toLowerCase();
+    if (!debouncedInput.trim()) return [];
+    const query = debouncedInput.toLowerCase();
     return list.filter(s => s.toLowerCase().includes(query)).slice(0, 4);
-  }, [input, currentLanguage]);
+  }, [debouncedInput, currentLanguage]);
 
+  // Handle rendering of code blocks, math, and diagrams
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
+
+    // Prism syntax highlighting
     if (typeof Prism !== 'undefined') {
       Prism.highlightAll();
     }
-  }, [messages]);
+
+    // KaTeX Auto-render
+    if (typeof renderMathInElement !== 'undefined' && scrollRef.current) {
+      renderMathInElement(scrollRef.current, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false},
+          {left: '\\(', right: '\\)', display: false},
+          {left: '\\[', right: '\\]', display: true}
+        ],
+        throwOnError: false
+      });
+    }
+
+    // Mermaid Rendering
+    if (typeof mermaid !== 'undefined' && scrollRef.current) {
+      try {
+        mermaid.init(undefined, ".mermaid");
+      } catch (e) {
+        console.error("Mermaid initialization failed", e);
+      }
+    }
+  }, [messages, isUserTyping]);
 
   // Handle clicking outside of suggestions to close them
   useEffect(() => {
@@ -65,11 +110,31 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInput(value);
+    setShowSuggestions(true);
+    
+    if (value.trim()) {
+      setIsUserTyping(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
+        setIsUserTyping(false);
+      }, 1500);
+    } else {
+      setIsUserTyping(false);
+    }
+  };
+
   const handleSend = async (customInput?: string) => {
     const textToSend = customInput || input;
     if (!textToSend.trim() || isLoading) return;
 
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    setIsUserTyping(false);
+    
     setInput('');
+    setDebouncedInput('');
     setShowSuggestions(false);
     await sendMessage(textToSend, currentLanguage);
   };
@@ -85,6 +150,35 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
     await sendMessage(lastUserMsg.content, currentLanguage, true);
   };
 
+  // Improved markdown-like text formatter for bold, italics, and lists
+  const formatTextSegments = (text: string) => {
+    let segments: (string | React.ReactNode)[] = [text];
+
+    // Process bold: **text**
+    segments = segments.flatMap(seg => {
+      if (typeof seg !== 'string') return seg;
+      const parts = seg.split(/(\*\*.*?\*\*)/g);
+      return parts.map((p, i) => 
+        p.startsWith('**') && p.endsWith('**') 
+          ? <strong key={`b-${i}`} className="font-bold text-white">{p.slice(2, -2)}</strong> 
+          : p
+      );
+    });
+
+    // Process italics: *text*
+    segments = segments.flatMap(seg => {
+      if (typeof seg !== 'string') return seg;
+      const parts = seg.split(/(\*.*?\*)/g);
+      return parts.map((p, i) => 
+        p.startsWith('*') && p.endsWith('*') 
+          ? <em key={`i-${i}`} className="italic text-slate-200">{p.slice(1, -1)}</em> 
+          : p
+      );
+    });
+
+    return segments;
+  };
+
   const renderContent = (content: string) => {
     const parts = content.split(/(```[\s\S]*?```)/g);
     
@@ -94,6 +188,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
         const lang = match?.[1] || 'clike';
         const code = match?.[2] || '';
         
+        // Handle Mermaid Diagrams
+        if (lang === 'mermaid') {
+          return (
+            <div key={index} className="mermaid-wrapper my-6 p-4 bg-slate-900/40 border border-white/5 rounded-2xl overflow-x-auto flex justify-center">
+              <pre className="mermaid opacity-100">{code.trim()}</pre>
+            </div>
+          );
+        }
+
         return (
           <div key={index} className="relative group my-4">
              <div className="absolute top-2 right-4 text-[9px] font-bold text-slate-600 uppercase tracking-widest pointer-events-none z-10">
@@ -108,9 +211,34 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
       
       return (
         <div key={index} className="whitespace-pre-wrap mb-4 font-light text-slate-300">
-          {part.split('\n').map((line, lIdx) => (
-            <p key={lIdx} className={line.trim() === '' ? 'h-2' : 'mb-2'}>{line}</p>
-          ))}
+          {part.split('\n').map((line, lIdx) => {
+            const trimmedLine = line.trim();
+            if (trimmedLine === '') return <div key={lIdx} className="h-2" />;
+            
+            // Basic support for unordered lists
+            if (trimmedLine.startsWith('* ') || trimmedLine.startsWith('- ')) {
+              return (
+                <div key={lIdx} className="flex gap-3 ml-4 mb-2">
+                  <span className="text-indigo-500 mt-1.5 flex-shrink-0">•</span>
+                  <span>{formatTextSegments(line.substring(2))}</span>
+                </div>
+              );
+            }
+            
+            // Basic support for ordered lists
+            if (/^\d+\. /.test(trimmedLine)) {
+              return (
+                <div key={lIdx} className="flex gap-3 ml-4 mb-2">
+                  <span className="text-indigo-500 font-bold font-mono text-[10px] mt-1 flex-shrink-0">
+                    {trimmedLine.match(/^\d+/)?.[0]}.
+                  </span>
+                  <span>{formatTextSegments(line.replace(/^\d+\. /, ''))}</span>
+                </div>
+              );
+            }
+
+            return <p key={lIdx} className="mb-2">{formatTextSegments(line)}</p>;
+          })}
         </div>
       );
     });
@@ -135,7 +263,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
         aria-label="Riwayat percakapan"
       >
         {messages.map((msg, i) => (
-          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`} aria-label={msg.role === 'user' ? 'Pesan Anda' : 'Pesan dari AI'}>
+          <div key={msg.id} className={`flex items-start gap-3 md:gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`} aria-label={msg.role === 'user' ? 'Pesan Anda' : 'Pesan dari AI'}>
+            {msg.role === 'model' && (
+              <div className="flex-shrink-0 mt-1 hidden sm:block">
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-[10px] text-white shadow-lg shadow-indigo-500/20 border border-white/10 select-none">
+                  T
+                </div>
+              </div>
+            )}
             <div className={`max-w-[90%] md:max-w-[85%] relative group ${
               msg.role === 'user' 
                 ? 'bg-indigo-600 p-4 rounded-2xl text-white rounded-br-none shadow-lg' 
@@ -163,7 +298,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
 
               {/* Retry Mechanism for Errors */}
               {msg.isError && !msg.isLoading && (
-                <div className="mt-6 flex flex-col items-start gap-4">
+                <div className="mt-6 flex flex-wrap gap-4">
                   <button 
                     onClick={handleRetry}
                     className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95 group/retry"
@@ -173,6 +308,18 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
                     </svg>
                     Retry Architectural Link
                   </button>
+                  
+                  {msg.content.includes("Quota Exceeded") && (
+                    <button 
+                      onClick={openKeyManager}
+                      className="flex items-center gap-2 px-6 py-3 bg-white text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl hover:bg-indigo-50 active:scale-95"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                      </svg>
+                      Update API Key
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -205,6 +352,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
             </div>
           </div>
         ))}
+
+        {isUserTyping && (
+          <div className="flex items-start gap-3 md:gap-4 justify-end animate-fadeIn">
+            <div className="bg-indigo-600/10 px-4 py-2 rounded-2xl text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] border border-indigo-500/10 flex items-center gap-3">
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+              Drafting Blueprint
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={`p-8 relative ${isLabView ? 'max-w-4xl mx-auto w-full' : 'bg-slate-800 border-t border-slate-700'}`} ref={inputContainerRef}>
@@ -259,10 +419,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
           <input
             type="text"
             value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              setShowSuggestions(true);
-            }}
+            onChange={handleInputChange}
             onFocus={() => setShowSuggestions(true)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             aria-label={`Diskusikan arsitektur ${currentLanguage}`}
