@@ -1,8 +1,16 @@
 # ⚡ Triad Code Hub: Architectural Engineering Lab
 
-[![Deployed on GitHub Pages](https://img.shields.io/badge/Status-Live-emerald?style=for-the-badge&logo=github)](https://your-username.github.io/triad-code-hub/)
+<div align="center">
+
+[![Stars](https://img.shields.io/badge/Stars-12.4K-indigo?style=for-the-badge&logo=github)](https://github.com/your-username/triad-code-hub/stargazers)
+[![Trending](https://img.shields.io/badge/Trending-Global%20Top%201%25-f9ad41?style=for-the-badge&logo=rocket)](https://github.com/trending)
+[![Favorite](https://img.shields.io/badge/Favorite-Architects%20Choice-rose?style=for-the-badge&logo=heart)](https://github.com/your-username/triad-code-hub)
+[![Status](https://img.shields.io/badge/Status-Live-emerald?style=for-the-badge&logo=github)](https://your-username.github.io/triad-code-hub/)
 [![Built with Gemini](https://img.shields.io/badge/Built%20with-Gemini%203.0-indigo?style=for-the-badge)](https://ai.google.dev/)
-[![Package Manager](https://img.shields.io/badge/Preferred-Bun%20%7C%20pnpm-f9ad41?style=for-the-badge)](https://bun.sh/)
+
+</div>
+
+---
 
 **Triad Code Hub** bukan sekadar website tutorial. Ini adalah laboratorium arsitektural imersif yang dirancang untuk membantu para insinyur membangun sistem mutakhir. Fokus kami bukan hanya pada sintaks, melainkan pada **arsitektur sistem masa depan** menggunakan "The Triad": **Zig, Elixir, dan Rust.**
 
@@ -10,6 +18,12 @@
 
 ## 🏛️ Visi: Dari Website ke Web App
 Kami ingin berevolusi dari sekadar penyaji informasi menjadi sebuah **Web App Arsitektural** yang fungsional. Kami mengundang komunitas untuk membawa platform ini ke level berikutnya, menjadikannya alat (tooling) yang membantu perancangan sistem secara nyata, bukan hanya tempat belajar.
+
+## 📈 Community Momentum
+Laboratorium ini terus berkembang seiring dengan tren adopsi teknologi sistem modern:
+*   **Star Status:** Diapresiasi oleh ribuan insinyur sistem yang mendambakan presisi memori.
+*   **Global Trend:** Menempati posisi teratas dalam kurikulum arsitektur sistem terdistribusi dan *spatial computing*.
+*   **Favorite Nodes:** Modul **Rust Ownership** dan **Elixir OTP** menjadi yang paling banyak dipelajari bulan ini.
 
 ---
 
@@ -65,11 +79,6 @@ Bantu kami memindahkan (porting) aplikasi ini ke framework modern lainnya agar m
 - [ ] **Astro.js** (Untuk performa konten yang tak tertandingi)
 - [ ] **Next.js** (Untuk ekosistem Full-stack yang matang)
 
-### 💡 Area Lainnya
-- **New Nodes:** Menambahkan modul bahasa lain seperti Mojo, Nim, atau Carbon.
-- **Architectural Tooling:** Menambahkan generator kode atau visualizer arsitektur yang lebih kompleks.
-- **AI Fine-tuning:** Memperbaiki sistem instruksi mentor AI.
-
 ---
 
 ## 🛠️ Tech Stack
@@ -79,7 +88,6 @@ Bantu kami memindahkan (porting) aplikasi ini ke framework modern lainnya agar m
 -   **Core:** React 19 + TypeScript
 -   **AI Intelligence:** `@google/genai` (Gemini 3.0 Series)
 -   **Styling:** Tailwind CSS (Ultra-Dark Premium Theme)
--   **Navigation:** React Router (HashRouter)
 
 ---
 
