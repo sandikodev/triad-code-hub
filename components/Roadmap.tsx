@@ -107,17 +107,29 @@ export const Roadmap: React.FC<RoadmapProps> = ({ language }) => {
     return (
       <div className="relative py-12 px-2 md:px-0" role="status" aria-label="Memuat Peta Jalan">
         <div className="absolute left-8 md:left-10 top-0 bottom-0 w-[2px] bg-slate-800/30 rounded-full" />
-        <div className="space-y-20">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="relative pl-16 md:pl-28 opacity-50">
+        <div className="space-y-12">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="relative pl-16 md:pl-28">
               <div className="absolute left-6 md:left-8 top-1 flex items-center justify-center z-20">
                 <div className="w-6 h-6 md:w-8 md:h-8 rounded-xl bg-slate-800 border-2 border-slate-700 rotate-45 animate-pulse" />
               </div>
-              <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800/50 rounded-3xl p-8 shimmer">
-                <div className="h-8 bg-slate-800 rounded-lg w-1/2 animate-pulse mb-6" />
-                <div className="space-y-3">
+              <div 
+                className="bg-slate-900/40 backdrop-blur-md border border-slate-800/30 rounded-3xl p-8 overflow-hidden shimmer"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              >
+                <div className="h-7 bg-slate-800 rounded-lg w-1/3 mb-6 animate-pulse" />
+                <div className="space-y-3 mb-8">
                   <div className="h-4 bg-slate-800/60 rounded w-full animate-pulse" />
                   <div className="h-4 bg-slate-800/60 rounded w-5/6 animate-pulse" />
+                </div>
+                
+                <div className="pt-6 border-t border-slate-800/50">
+                   <div className="h-2 bg-slate-800/40 rounded w-20 mb-4 animate-pulse" />
+                   <div className="flex flex-wrap gap-3">
+                     {[1, 2, 3].map(c => (
+                       <div key={c} className="h-8 bg-slate-800/60 rounded-xl w-24 animate-pulse" />
+                     ))}
+                   </div>
                 </div>
               </div>
             </div>
