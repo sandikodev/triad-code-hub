@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { ChatMessage } from '../../types';
+import { Logo } from '../Logo';
 
 interface MessageItemProps {
   msg: ChatMessage;
@@ -18,9 +19,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
     <div className={`flex items-start gap-3 md:gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`} aria-label={msg.role === 'user' ? 'Pesan Anda' : 'Pesan dari AI'}>
       {msg.role === 'model' && (
         <div className="flex-shrink-0 mt-1 hidden sm:block">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-[10px] text-white shadow-lg shadow-indigo-500/20 border border-white/10 select-none">
-            T
-          </div>
+          <Logo size="sm" className="rounded-lg shadow-lg border border-white/10" />
         </div>
       )}
       <div className={`max-w-[90%] md:max-w-[85%] relative group ${

@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { LanguageType } from '../../types';
+import { Logo } from '../Logo';
 
 interface FloatingHeaderProps {
   scrolled: boolean;
@@ -32,10 +33,7 @@ export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, active
           : 'bg-transparent border-transparent'
       }`}>
         <div className="flex items-center gap-4 group cursor-pointer" onClick={() => navigate('/')}>
-          <div className="relative">
-            <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center font-black text-sm shadow-lg shadow-indigo-500/20 transform group-hover:rotate-12 transition-transform duration-500">T</div>
-            <div className="absolute -inset-1 bg-indigo-500/20 blur-md rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
-          </div>
+          <Logo size="md" />
           <div className="flex flex-col text-left">
             <span className="font-black text-lg tracking-tighter leading-none">TriadHub</span>
             <span className="text-[8px] font-bold text-indigo-500 uppercase tracking-[0.3em] leading-none mt-1 text-left">Architecture Lab</span>

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Logo } from '../Logo';
 
 export const Footer: React.FC = () => {
   const navigate = useNavigate();
@@ -8,8 +9,8 @@ export const Footer: React.FC = () => {
   return (
     <footer className="py-24 px-8 border-t border-white/5 bg-slate-950">
       <div className="max-w-7xl mx-auto flex flex-col items-center">
-        <div className="flex items-center gap-4 mb-10 cursor-pointer" onClick={() => navigate('/')}>
-           <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center font-black text-xl shadow-2xl">T</div>
+        <div className="flex items-center gap-4 mb-10 cursor-pointer group" onClick={() => navigate('/')}>
+           <Logo size="lg" />
            <div className="flex flex-col items-start text-left">
              <span className="font-black text-2xl tracking-tighter">TriadHub</span>
              <span className="text-[10px] text-slate-600 font-bold uppercase tracking-[0.3em]">Engineering Excellence</span>

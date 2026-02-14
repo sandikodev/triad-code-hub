@@ -70,6 +70,50 @@ const FuturePage: React.FC = () => {
         </div>
       </section>
 
+      {/* WEB REALITY CHECK SECTION */}
+      <section className="py-32 px-8 bg-indigo-600/5 border-y border-white/5">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <div className="order-2 lg:order-1">
+             <div className="relative aspect-square w-full max-w-md mx-auto">
+                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-rose-500/20 rounded-[4rem] animate-pulse"></div>
+                <div className="absolute inset-8 border border-white/10 rounded-[3rem] p-10 flex flex-col justify-center gap-6 backdrop-blur-3xl bg-slate-900/40 shadow-2xl">
+                   <div className="space-y-2">
+                      <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Scope: Literal Web</span>
+                      <h3 className="text-3xl font-black text-white italic">Web as Infrastructure</h3>
+                   </div>
+                   <div className="space-y-4">
+                      {[
+                        "Networking Protocol Engineering",
+                        "High-Throughput Packet Processing",
+                        "Cross-Platform Browser Kernels",
+                        "Global Content Distribution Nodes"
+                      ].map(t => (
+                        <div key={t} className="flex items-center gap-3 text-sm text-slate-300">
+                           <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div>
+                           {t}
+                        </div>
+                      ))}
+                   </div>
+                </div>
+             </div>
+          </div>
+          <div className="order-1 lg:order-2 space-y-10">
+            <div className="space-y-4">
+               <span className="text-indigo-500 font-black text-[10px] uppercase tracking-[0.4em]">The Web Paradox</span>
+               <h2 className="text-5xl font-black text-white tracking-tighter leading-tight">Membangun Web, Bukan <br />Hanya Menghias Situs.</h2>
+            </div>
+            <div className="space-y-6 text-slate-400 font-light leading-relaxed text-lg">
+               <p>
+                 Web Developer sejati bertanggung jawab atas <strong className="text-white">Pembangunan Teknologi Web</strong>. Ini mencakup pembangunan server berperforma tinggi yang menangani protokol HTTP/3 secara mentah, pembuatan runtime WebAssembly untuk komputasi berat, hingga manajemen klaster terdistribusi global.
+               </p>
+               <p>
+                 Di TriadHub, kami melatih Anda untuk menguasai <strong className="text-indigo-400">Fondasi Harafiah</strong> dari web. Menggunakan Zig untuk presisi kernel, Rust untuk keamanan memori infrastruktur, dan Elixir untuk skalabilitas node masif.
+               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* The Layers Section */}
       <section className="py-20 px-8 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">

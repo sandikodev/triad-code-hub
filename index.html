@@ -1,10 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Triad Code Hub - Architectural Engineering</title>
+    
+    <!-- Favicon Links -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2225%22 fill=%22%236366f1%22/><path d=%22M50 25L75 70H25L50 25Z%22 fill=%22white%22/><circle cx=%2250%22 cy=%2248%22 r=%226%22 fill=%22%236366f1%22/></svg>">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,7 +100,7 @@
         animation: shimmer 2s infinite;
       }
       
-      /* Premium Tooltip Style - Updated to follow cursor */
+      /* Premium Tooltip Style */
       .premium-tooltip {
         pointer-events: none;
         position: fixed !important;
@@ -117,7 +121,7 @@
         white-space: nowrap;
         opacity: 0;
         visibility: hidden;
-        transform: translate(15px, 15px) !important; /* Offset from cursor */
+        transform: translate(15px, 15px) !important;
         transition: opacity 0.15s ease-out, visibility 0.15s ease-out;
         will-change: left, top;
       }
@@ -184,7 +188,6 @@
 </head>
   <body>
     <div id="root"></div>
-    <!-- Entry point script added here -->
     <script type="module" src="index.tsx"></script>
   </body>
 </html>

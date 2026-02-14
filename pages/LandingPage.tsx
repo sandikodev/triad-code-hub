@@ -7,6 +7,89 @@ import { ParadigmSection } from '../components/landing/ParadigmSection';
 import { PathwaySection } from '../components/landing/PathwaySection';
 import { Footer } from '../components/landing/Footer';
 
+const CareerVisionSection: React.FC = () => {
+  return (
+    <section className="py-40 px-8 relative overflow-hidden bg-slate-950">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-20 items-center">
+          <div className="space-y-10">
+            <div className="space-y-4">
+              <span className="text-rose-500 font-black text-[10px] uppercase tracking-[0.4em]">Career Re-Definition</span>
+              <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9]">
+                Bukan Sekadar <br />
+                <span className="text-slate-800">Website Builder.</span>
+              </h2>
+            </div>
+            
+            <p className="text-slate-500 text-lg font-light leading-relaxed">
+              Miskonsepsi terbesar adalah menganggap "Web Developer" hanya membuat situs. Web adalah <strong className="text-white">Runtime Lingkungan Global</strong> yang paling masif di planet ini.
+            </p>
+
+            <div className="space-y-8">
+              {[
+                { 
+                  title: "Infrastructure Engineer", 
+                  desc: "Membangun core browser, networking stack, dan CDN menggunakan Rust/Zig.",
+                  icon: "🏗️"
+                },
+                { 
+                  title: "Distributed Systems Architect", 
+                  desc: "Merancang sistem yang tidak pernah mati dengan Elixir/OTP untuk jutaan pengguna.",
+                  icon: "🌐"
+                },
+                { 
+                  title: "High-Performance WASM Expert", 
+                  desc: "Membawa performa desktop/native ke browser melalui WebAssembly.",
+                  icon: "🚀"
+                }
+              ].map((item, i) => (
+                <div key={i} className="flex gap-6 group">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-xl group-hover:bg-indigo-600/20 group-hover:border-indigo-500/50 transition-all">
+                    {item.icon}
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-white font-bold text-lg">{item.title}</h4>
+                    <p className="text-slate-500 text-sm font-light">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 bg-indigo-600/10 blur-[100px] rounded-full"></div>
+            <div className="relative p-12 bg-slate-900/40 border border-white/5 rounded-[4rem] space-y-8 backdrop-blur-3xl">
+               <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-rose-500 rounded-full"></div>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Industry Reality Check</span>
+               </div>
+               <div className="space-y-6">
+                  <div className="p-6 bg-slate-950/50 rounded-3xl border border-white/5">
+                     <p className="text-xs text-slate-400 font-mono leading-relaxed">
+                       "Dunia membutuhkan orang yang bisa membangun <span className="text-white font-bold">Teknologi Web</span>, bukan hanya yang bisa memakai alat yang sudah ada. Zig, Rust, dan Elixir adalah kunci untuk menjadi <span className="text-indigo-400">Literate Web Architect</span>."
+                     </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="p-6 bg-indigo-600/5 border border-indigo-500/10 rounded-3xl">
+                        <span className="text-[8px] font-black text-indigo-500 uppercase tracking-widest block mb-2">Peluang Kerja</span>
+                        <p className="text-xl font-black text-white">$150k+</p>
+                        <p className="text-[10px] text-slate-600 uppercase mt-1">Avg Lead System Architect</p>
+                     </div>
+                     <div className="p-6 bg-emerald-600/5 border border-emerald-500/10 rounded-3xl">
+                        <span className="text-[8px] font-black text-emerald-500 uppercase tracking-widest block mb-2">Skalabilitas</span>
+                        <p className="text-xl font-black text-white">Infinite</p>
+                        <p className="text-[10px] text-slate-600 uppercase mt-1">Global Infra Demand</p>
+                     </div>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const PricingSection: React.FC = () => {
   return (
     <section id="pricing" className="py-40 px-8 relative bg-white/[0.01]">
@@ -127,6 +210,8 @@ const LandingPage: React.FC = () => {
       />
 
       <ParadigmSection />
+
+      <CareerVisionSection />
 
       <PathwaySection 
         activeRoadmap={activeRoadmap} 
