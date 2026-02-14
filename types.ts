@@ -36,4 +36,5 @@ export interface ChatMessage {
   content: string;
   timestamp: Date;
   isError?: boolean;
+  isLoading?: boolean;
 }

@@ -26,11 +26,13 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const saved = localStorage.getItem(STORAGE_KEY_MESSAGES);
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Ensure timestamps are converted back to Date objects
-        return parsed.map((m: any) => ({
-          ...m,
-          timestamp: new Date(m.timestamp)
-        }));
+        // Ensure timestamps are converted back to Date objects and filter out any orphaned loading states
+        return parsed
+          .filter((m: any) => !m.isLoading)
+          .map((m: any) => ({
+            ...m,
+            timestamp: new Date(m.timestamp)
+          }));
       }
     } catch (e) {
       console.error("Failed to load chat messages from localStorage", e);
@@ -51,10 +53,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {};
   });
 
-  // Persist messages to localStorage whenever they change
+  // Persist messages to localStorage whenever they change, filtering out active loading states
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify(messages));
+      const messagesToSave = messages.filter(m => !m.isLoading);
+      localStorage.setItem(STORAGE_KEY_MESSAGES, JSON.stringify(messagesToSave));
     } catch (e) {
       console.error("Failed to save chat messages to localStorage", e);
     }
@@ -93,17 +96,26 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
 
+    // Create a placeholder message for the AI response
+    const modelResponseId = generateId();
+    const placeholderMessage: ChatMessage = {
+      id: modelResponseId,
+      role: 'model',
+      content: '',
+      timestamp: new Date(),
+      isLoading: true
+    };
+    
+    setMessages(prev => [...prev, placeholderMessage]);
     setIsLoading(true);
 
     try {
       const responseText = await getGeminiResponse(content, language);
-      const modelMessage: ChatMessage = {
-        id: generateId(),
-        role: 'model',
-        content: responseText,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, modelMessage]);
+      setMessages(prev => prev.map(m => 
+        m.id === modelResponseId 
+          ? { ...m, content: responseText, isLoading: false } 
+          : m
+      ));
     } catch (error: any) {
       console.error("Failed to send message", error);
       
@@ -112,14 +124,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         errorText = "Sistem sedang mengalami beban tinggi (Quota Exceeded). Silakan coba sesaat lagi.";
       }
 
-      const errorMessage: ChatMessage = {
-        id: generateId(),
-        role: 'model',
-        content: errorText,
-        timestamp: new Date(),
-        isError: true
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => prev.map(m => 
+        m.id === modelResponseId 
+          ? { ...m, content: errorText, isLoading: false, isError: true } 
+          : m
+      ));
     } finally {
       setIsLoading(false);
     }

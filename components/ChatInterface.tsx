@@ -150,11 +150,19 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
                 </div>
               )}
               <div className={`text-sm leading-relaxed ${msg.role === 'model' ? 'font-light' : 'font-medium'}`}>
-                {renderContent(msg.content)}
+                {msg.isLoading ? (
+                  <div className="flex gap-1.5 py-2">
+                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                ) : (
+                  renderContent(msg.content)
+                )}
               </div>
 
               {/* Retry Mechanism for Errors */}
-              {msg.isError && (
+              {msg.isError && !msg.isLoading && (
                 <div className="mt-6 flex flex-col items-start gap-4">
                   <button 
                     onClick={handleRetry}
@@ -169,7 +177,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
               )}
 
               {/* Feedback Mechanism */}
-              {msg.role === 'model' && !msg.isError && (
+              {msg.role === 'model' && !msg.isError && !msg.isLoading && (
                 <div className="mt-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Rate response:</span>
                   <div className="flex items-center gap-2">
@@ -197,15 +205,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
             </div>
           </div>
         ))}
-        {isLoading && (
-          <div className="flex justify-start" aria-label="AI sedang mengetik">
-            <div className="flex gap-1.5 p-4 bg-slate-900/50 rounded-2xl">
-              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
-          </div>
-        )}
       </div>
 
       <div className={`p-8 relative ${isLabView ? 'max-w-4xl mx-auto w-full' : 'bg-slate-800 border-t border-slate-700'}`} ref={inputContainerRef}>
