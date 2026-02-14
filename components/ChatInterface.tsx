@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { LanguageType, ChatMessage } from '../types';
-import { getGeminiResponse } from '../services/geminiService';
 import { SUGGESTIONS } from '../constants';
+import { useChat } from '../context/ChatContext';
 
 declare var Prism: any;
 
@@ -11,23 +11,32 @@ interface ChatInterfaceProps {
   isLabView?: boolean;
 }
 
-const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, isLabView }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'initial-welcome',
-      role: 'model',
-      content: `Selamat datang di Lab Arsitektural. Saya adalah asisten Anda untuk masteri ${currentLanguage === 'General' ? 'Zig, Elixir, atau Rust' : currentLanguage}. Apa blueprint yang ingin kita bahas hari ini?`,
-      timestamp: new Date()
-    }
-  ]);
+  const { 
+    messages, 
+    isLoading, 
+    feedbackHistory, 
+    sendMessage, 
+    handleFeedback,
+    setMessages 
+  } = useChat();
+  
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [feedbackHistory, setFeedbackHistory] = useState<Record<string, 'positive' | 'negative'>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputContainerRef = useRef<HTMLDivElement>(null);
+
+  // Initialize welcome message if messages are empty
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([{
+        id: 'initial-welcome',
+        role: 'model',
+        content: `Selamat datang di Lab Arsitektural. Saya adalah asisten Anda untuk masteri ${currentLanguage === 'General' ? 'Zig, Elixir, atau Rust' : currentLanguage}. Apa blueprint yang ingin kita bahas hari ini?`,
+        timestamp: new Date()
+      }]);
+    }
+  }, [currentLanguage, setMessages, messages.length]);
 
   const filteredSuggestions = useMemo(() => {
     const list = SUGGESTIONS[currentLanguage] || SUGGESTIONS["General"];
@@ -35,17 +44,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
     const query = input.toLowerCase();
     return list.filter(s => s.toLowerCase().includes(query)).slice(0, 4);
   }, [input, currentLanguage]);
-
-  useEffect(() => {
-    const storedFeedback = localStorage.getItem('triadhub_chat_feedback');
-    if (storedFeedback) {
-      try {
-        setFeedbackHistory(JSON.parse(storedFeedback));
-      } catch (e) {
-        console.error("Failed to load feedback history", e);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -67,39 +65,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleFeedback = (messageId: string, rating: 'positive' | 'negative') => {
-    const newHistory = { ...feedbackHistory, [messageId]: rating };
-    setFeedbackHistory(newHistory);
-    localStorage.setItem('triadhub_chat_feedback', JSON.stringify(newHistory));
-  };
-
   const handleSend = async (customInput?: string) => {
     const textToSend = customInput || input;
     if (!textToSend.trim() || isLoading) return;
 
-    const userMessage: ChatMessage = {
-      id: generateId(),
-      role: 'user',
-      content: textToSend,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
     setInput('');
     setShowSuggestions(false);
-    setIsLoading(true);
-
-    const responseText = await getGeminiResponse(textToSend, currentLanguage);
-
-    const modelMessage: ChatMessage = {
-      id: generateId(),
-      role: 'model',
-      content: responseText,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, modelMessage]);
-    setIsLoading(false);
+    await sendMessage(textToSend, currentLanguage);
   };
 
   const renderContent = (content: string) => {
