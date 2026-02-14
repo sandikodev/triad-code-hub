@@ -1,9 +1,11 @@
+
 import React, { useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import TutorLab from './pages/TutorLab';
 import SetupPage from './pages/SetupPage';
 import BlueprintsPage from './pages/BlueprintsPage';
+import FuturePage from './pages/FuturePage';
 import { ChatProvider } from './context/ChatContext';
 import { AuthProvider } from './context/AuthContext';
 
@@ -37,6 +39,7 @@ const App: React.FC = () => {
               <Route path="/" element={<LandingPage />} />
               <Route path="/setup" element={<SetupPage />} />
               <Route path="/blueprints" element={<BlueprintsPage />} />
+              <Route path="/vision" element={<FuturePage />} />
               <Route path="/lab/:lang" element={<TutorLab />} />
             </Routes>
           </div>

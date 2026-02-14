@@ -3,7 +3,11 @@ export enum LanguageType {
   ZIG = 'Zig',
   ELIXIR = 'Elixir',
   RUST = 'Rust',
-  NIM = 'Nim'
+  NIM = 'Nim',
+  MOJO = 'Mojo',
+  CARBON = 'Carbon',
+  GLEAM = 'Gleam',
+  WGSL = 'WGSL'
 }
 
 export interface Concept {
@@ -28,6 +32,7 @@ export interface LanguageInfo {
   icon: string;
   docs: string;
   isComingSoon?: boolean;
+  isSatellite?: boolean; // Menandai bahasa pendukung arsitektur
 }
 
 export interface ChatMessage {
@@ -39,7 +44,7 @@ export interface ChatMessage {
   isLoading?: boolean;
 }
 
-export type BlueprintCategory = 'High Throughput' | 'Fault Tolerance' | 'Low Latency' | 'Real-time';
+export type BlueprintCategory = 'High Throughput' | 'Fault Tolerance' | 'Low Latency' | 'Real-time' | 'Neural Compute' | 'Spatial Graphics';
 
 export interface Blueprint {
   id: string;

@@ -3,6 +3,32 @@ import { Blueprint, LanguageType } from '../types';
 
 export const BLUEPRINTS_DATA: Blueprint[] = [
   {
+    id: 'neural-decoder',
+    title: 'BCI Neural Signal Decoder',
+    category: 'Neural Compute',
+    languages: [LanguageType.MOJO, LanguageType.RUST],
+    description: 'Pipeline pemrosesan sinyal saraf realtime yang menggunakan Mojo untuk inferensi ML cepat dan Rust untuk abstraksi hardware yang aman.',
+    stats: [
+      { label: 'Jitter', value: '< 0.5ms' },
+      { label: 'Inference', value: 'SIMD Opt' },
+      { label: 'Safety', value: 'Formal' }
+    ],
+    difficulty: 'Lead'
+  },
+  {
+    id: 'spatial-renderer-universal',
+    title: 'Universal Spatial Render Pipe',
+    category: 'Spatial Graphics',
+    languages: [LanguageType.WGSL, LanguageType.RUST],
+    description: 'Engine rendering spasial berbasis WebGPU yang mengonvergensi pipeline browser dan native untuk pengalaman XR universal.',
+    stats: [
+      { label: 'API', value: 'WebGPU' },
+      { label: 'Platform', value: 'Cross-XR' },
+      { label: 'Memory', value: 'Unified' }
+    ],
+    difficulty: 'Architect'
+  },
+  {
     id: 'distributed-ledger',
     title: 'High-Frequency Distributed Ledger',
     category: 'High Throughput',
@@ -16,42 +42,16 @@ export const BLUEPRINTS_DATA: Blueprint[] = [
     difficulty: 'Lead'
   },
   {
-    id: 'spatial-engine',
-    title: 'Spatial Compute Engine Core',
-    category: 'Low Latency',
-    languages: [LanguageType.ZIG],
-    description: 'Mesin komputasi spasial untuk AR/VR yang dibangun dengan Zig Comptime untuk optimasi SIMD dan manajemen memori deterministik.',
-    stats: [
-      { label: 'Overhead', value: 'Zero-cost' },
-      { label: 'Binary', value: '< 500KB' },
-      { label: 'Precision', value: 'Bit-exact' }
-    ],
-    difficulty: 'Architect'
-  },
-  {
     id: 'fault-tolerant-gateway',
     title: 'Global Edge Messaging Gateway',
     category: 'Fault Tolerance',
-    languages: [LanguageType.ELIXIR, LanguageType.RUST],
-    description: 'Gateway pesan global menggunakan Rust untuk TLS termination cepat dan Elixir untuk manajemen sesi jutaan user yang terisolasi.',
+    languages: [LanguageType.GLEAM, LanguageType.RUST],
+    description: 'Gateway pesan menggunakan Gleam untuk type-safety di atas BEAM VM dan Rust untuk TLS termination performa tinggi.',
     stats: [
       { label: 'Uptime', value: '99.9999%' },
-      { label: 'Concurrency', value: '2M / node' },
-      { label: 'Healing', value: 'Auto-Supervised' }
+      { label: 'Concurrency', value: 'Type-Safe' },
+      { label: 'Healing', value: 'OTP-Based' }
     ],
     difficulty: 'Senior'
-  },
-  {
-    id: 'p2p-file-orchestrator',
-    title: 'Decentralized P2P Orchestrator',
-    category: 'Real-time',
-    languages: [LanguageType.RUST, LanguageType.ZIG],
-    description: 'Orkestrator file P2P yang memanfaatkan Rust untuk keamanan jaringan dan Zig untuk kernel-level disk I/O yang efisien.',
-    stats: [
-      { label: 'Protocols', value: 'QUIC / TCP' },
-      { label: 'I/O Speed', value: 'Disk-bound' },
-      { label: 'Reliability', value: 'Deterministic' }
-    ],
-    difficulty: 'Architect'
   }
 ];

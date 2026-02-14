@@ -15,14 +15,10 @@ export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, active
   const isHome = location.pathname === '/';
 
   const handleNavClick = (id: string) => {
-    if (isHome) {
+    if (isHome && id !== 'vision' && id !== 'blueprints' && id !== 'setup') {
       scrollTo(id);
     } else {
-      navigate('/');
-      setTimeout(() => {
-        const element = document.getElementById(id);
-        if (element) element.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      navigate(id === 'vision' ? '/vision' : id === 'blueprints' ? '/blueprints' : id === 'setup' ? '/setup' : '/');
     }
   };
 
@@ -48,40 +44,21 @@ export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, active
         
         <div className="hidden lg:flex items-center gap-10">
           {[
-            { label: 'Visi', id: 'visi' },
-            { label: 'Paradigma', id: 'paradigma' },
-            { label: 'Lab', id: 'lab' }
+            { label: 'Visi 2030', id: 'vision' },
+            { label: 'Blueprints', id: 'blueprints' },
+            { label: 'Setup Env', id: 'setup' }
           ].map((item) => (
             <button 
               key={item.label}
               onClick={() => handleNavClick(item.id)} 
-              className="relative text-[10px] font-bold text-slate-400 hover:text-white uppercase tracking-[0.2em] transition-colors group"
+              className={`relative text-[10px] font-bold uppercase tracking-[0.2em] transition-all group ${
+                location.pathname.includes(item.id) ? 'text-indigo-400' : 'text-slate-400 hover:text-white'
+              }`}
             >
               {item.label}
-              <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-indigo-500 transition-all duration-300 group-hover:w-full"></span>
+              <span className={`absolute -bottom-1 left-0 h-[1px] bg-indigo-500 transition-all duration-300 ${location.pathname.includes(item.id) ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
             </button>
           ))}
-          <div className="h-4 w-[1px] bg-white/10 mx-2"></div>
-          
-          <div className="relative group">
-            <button 
-              onClick={() => navigate('/blueprints')}
-              className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${location.pathname === '/blueprints' ? 'text-indigo-400' : 'text-slate-400 hover:text-white'}`}
-            >
-              Blueprints
-            </button>
-            <div className="premium-tooltip">Katalog Arsitektur Sistem</div>
-          </div>
-
-          <div className="relative group">
-            <button 
-              onClick={() => navigate('/setup')}
-              className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${location.pathname === '/setup' ? 'text-indigo-400' : 'text-slate-400 hover:text-white'}`}
-            >
-              Setup Env
-            </button>
-            <div className="premium-tooltip">Konfigurasi Dev Environment Lokal</div>
-          </div>
         </div>
 
         <div className="flex items-center gap-6">

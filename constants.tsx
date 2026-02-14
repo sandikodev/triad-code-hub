@@ -34,6 +34,28 @@ export const LANGUAGES: LanguageInfo[] = [
     docs: 'https://www.rust-lang.org/learn'
   },
   {
+    id: LanguageType.MOJO,
+    name: 'Mojo',
+    tagline: 'Python syntax, C performance.',
+    description: 'The future of AI infrastructure. Combining the usability of Python with the performance of C++ and Rust.',
+    color: 'bg-[#FF4500]',
+    accent: 'text-[#FF4500]',
+    icon: '🔥',
+    docs: 'https://docs.modular.com/mojo/',
+    isSatellite: true
+  },
+  {
+    id: LanguageType.GLEAM,
+    name: 'Gleam',
+    tagline: 'A friendly, type-safe BEAM language.',
+    description: 'A statically typed language for the Erlang VM, built for performance and maintainability in distributed systems.',
+    color: 'bg-[#ffaff3]',
+    accent: 'text-[#ffaff3]',
+    icon: '✨',
+    docs: 'https://gleam.run/',
+    isSatellite: true
+  },
+  {
     id: LanguageType.NIM,
     name: 'Nim',
     tagline: 'Efficient, expressive, elegant.',
@@ -51,32 +73,26 @@ export const SUGGESTIONS: Record<string, string[]> = {
     "Jelaskan tentang memory management di Zig",
     "Bagaimana cara kerja comptime?",
     "Apa perbedaan error sets dengan exception?",
-    "Contoh penggunaan defer yang tepat",
-    "Cara integrasi C dengan Zig",
     "Arsitektur Data-Oriented Design di Zig"
   ],
   [LanguageType.RUST]: [
     "Bagaimana Borrow Checker menjamin safety?",
     "Jelaskan konsep Lifetimes",
-    "Kapan harus menggunakan Arc dan Mutex?",
-    "Apa itu Zero-cost abstractions?",
-    "Perbedaan antara Trait dan Interface",
     "Optimasi memori dengan Smart Pointers"
   ],
   [LanguageType.ELIXIR]: [
     "Bagaimana Actor Model bekerja di BEAM?",
     "Jelaskan Supervision Trees",
-    "Apa keuntungan Pattern Matching?",
-    "Cara kerja Hot Code Swapping",
-    "Implementasi GenServer untuk state management",
-    "Skalabilitas terdistribusi dengan Elixir"
+    "Implementasi GenServer untuk state management"
+  ],
+  [LanguageType.MOJO]: [
+    "Bagaimana Mojo mengoptimalkan kernel GPU?",
+    "Perbedaan model memori Mojo vs Rust",
+    "Integrasi Python ecosystem di Mojo"
   ],
   "General": [
-    "Apa itu arsitektur Microservices?",
-    "Cara mengoptimalkan performa API",
-    "Prinsip SOLID dalam pengembangan sistem",
-    "Strategi caching yang efektif",
-    "Membangun sistem yang fault-tolerant",
-    "Keuntungan sistem terdistribusi"
+    "Apa itu arsitektur BCI (Brain-Computer Interface)?",
+    "Bagaimana menangani latency <10ms untuk AR/VR?",
+    "Prinsip Deterministic Computation dalam XR"
   ]
 };
