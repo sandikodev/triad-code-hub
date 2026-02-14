@@ -2,7 +2,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { LanguageType, RoadmapStep } from "../types";
 
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Always create a fresh instance to ensure the most up-to-date API key is used
+const createAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
 // Static fallbacks for core languages to prevent breakages during quota exhaustion
 const STATIC_ROADMAPS: Record<string, RoadmapStep[]> = {
@@ -101,8 +102,9 @@ const setCachedRoadmap = (language: string, data: RoadmapStep[]) => {
 };
 
 export const getGeminiResponse = async (prompt: string, context: LanguageType | 'General') => {
-  const ai = getAI();
-  const model = 'gemini-3-pro-preview';
+  const ai = createAI();
+  // Using gemini-3-flash-preview for general chat to maximize quota availability
+  const model = 'gemini-3-flash-preview';
 
   const systemInstruction = `Anda adalah "Architectural Mentor" tingkat dunia yang mengkhususkan diri pada Zig, Elixir, dan Rust. 
     Konteks saat ini: ${context}. 
@@ -128,8 +130,10 @@ export const getGeminiResponse = async (prompt: string, context: LanguageType | 
     return response.text || "Mohon maaf, blueprint arsitektur tidak dapat dihasilkan saat ini.";
   } catch (error: any) {
     console.error("Gemini API Error:", error);
-    // Standardizing quota error for UI detection
-    if (error?.message?.includes('429') || error?.message?.includes('quota') || error?.status === 'RESOURCE_EXHAUSTED') {
+    const errorMsg = error?.message || "";
+    const errorStatus = error?.status || "";
+    
+    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorStatus === 'RESOURCE_EXHAUSTED' || errorMsg.includes('RESOURCE_EXHAUSTED')) {
       throw new Error("QUOTA_EXCEEDED");
     }
     throw error;
@@ -137,11 +141,10 @@ export const getGeminiResponse = async (prompt: string, context: LanguageType | 
 };
 
 export const getRoadmap = async (language: LanguageType): Promise<RoadmapStep[]> => {
-  // 1. Check persistent cache
   const cached = getCachedRoadmap(language);
   if (cached) return cached;
 
-  const ai = getAI();
+  const ai = createAI();
   const model = 'gemini-3-flash-preview';
 
   const prompt = `Hasilkan peta jalan (roadmap) pembelajaran terstruktur 5 langkah untuk bahasa ${language}. 
@@ -195,31 +198,30 @@ export const getRoadmap = async (language: LanguageType): Promise<RoadmapStep[]>
 
     const roadmapData = JSON.parse(response.text || "[]");
     
-    // 2. Update persistent cache if successful
     if (roadmapData && roadmapData.length > 0) {
       setCachedRoadmap(language, roadmapData);
       return roadmapData;
     }
     
-    // Fallback to static if empty JSON
     return STATIC_ROADMAPS[language] || [];
   } catch (error: any) {
     console.warn("Roadmap Generation failed, attempting fallback...", error);
+    const errorMsg = error?.message || "";
+    const errorStatus = error?.status || "";
     
-    if (error?.message?.includes('429') || error?.message?.includes('quota') || error?.status === 'RESOURCE_EXHAUSTED') {
-      // 3. Fallback logic: check for static data if API fails (e.g. 429 quota exhausted)
+    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorStatus === 'RESOURCE_EXHAUSTED' || errorMsg.includes('RESOURCE_EXHAUSTED')) {
       if (STATIC_ROADMAPS[language]) {
         console.info(`Using static fallback roadmap for ${language}`);
         return STATIC_ROADMAPS[language];
       }
       throw new Error("QUOTA_EXCEEDED");
     }
-    return [];
+    return STATIC_ROADMAPS[language] || [];
   }
 };
 
 export const getConceptCodeExample = async (language: LanguageType, concept: string) => {
-  const ai = getAI();
+  const ai = createAI();
   const model = 'gemini-3-flash-preview';
 
   const prompt = `Berikan contoh kode yang idiomatik dan penjelasan arsitektural singkat (2-3 kalimat) untuk konsep: "${concept}" dalam bahasa ${language}. 
@@ -236,7 +238,10 @@ export const getConceptCodeExample = async (language: LanguageType, concept: str
     return response.text || "Dokumentasi teknis tidak ditemukan.";
   } catch (error: any) {
     console.error("Concept Code Fetch Error:", error);
-    if (error?.message?.includes('429') || error?.message?.includes('quota') || error?.status === 'RESOURCE_EXHAUSTED') {
+    const errorMsg = error?.message || "";
+    const errorStatus = error?.status || "";
+    
+    if (errorMsg.includes('429') || errorMsg.includes('quota') || errorStatus === 'RESOURCE_EXHAUSTED' || errorMsg.includes('RESOURCE_EXHAUSTED')) {
       return "SISTEM_QUOTA_EXCEEDED";
     }
     return "Gagal memuat blueprint kode.";

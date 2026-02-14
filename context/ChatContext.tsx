@@ -120,8 +120,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Failed to send message", error);
       
       let errorText = "Gagal menghubungkan ke Arsitektur AI. Sinyal terputus atau terjadi gangguan pada tautan blueprint.";
-      if (error?.message?.includes('429') || error?.message?.includes('quota')) {
-        errorText = "Sistem sedang mengalami beban tinggi (Quota Exceeded). Silakan coba sesaat lagi.";
+      const errorMsg = error?.message || "";
+      const errorStatus = error?.status || "";
+      
+      if (errorMsg.includes('429') || errorMsg.includes('quota') || errorStatus === 'RESOURCE_EXHAUSTED' || errorMsg.includes('RESOURCE_EXHAUSTED') || errorMsg === 'QUOTA_EXCEEDED') {
+        errorText = "Sistem sedang mengalami beban tinggi atau kuota publik telah tercapai (Quota Exceeded). Silakan gunakan API Key pribadi Anda di menu Setup atau tunggu beberapa menit.";
       }
 
       setMessages(prev => prev.map(m => 

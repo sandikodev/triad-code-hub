@@ -1,9 +1,13 @@
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { LanguageType, ChatMessage } from '../types';
 import { SUGGESTIONS } from '../constants';
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
+import { MessageItem } from './chat/MessageItem';
+import { ChatInputArea } from './chat/ChatInputArea';
+import { ChatAutocomplete } from './chat/ChatAutocomplete';
+import { QuickActionPills } from './chat/QuickActionPills';
 
 declare var Prism: any;
 declare var renderMathInElement: any;
@@ -35,18 +39,13 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
   const inputContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Debounce input for suggestions
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedInput(input);
     }, 300);
-
-    return () => {
-      clearTimeout(handler);
-    };
+    return () => clearTimeout(handler);
   }, [input]);
 
-  // Initialize welcome message if messages are empty
   useEffect(() => {
     if (messages.length === 0) {
       setMessages([{
@@ -65,18 +64,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
     return list.filter(s => s.toLowerCase().includes(query)).slice(0, 4);
   }, [debouncedInput, currentLanguage]);
 
-  // Handle rendering of code blocks, math, and diagrams
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-
-    // Prism syntax highlighting
-    if (typeof Prism !== 'undefined') {
-      Prism.highlightAll();
-    }
-
-    // KaTeX Auto-render
+    if (typeof Prism !== 'undefined') Prism.highlightAll();
     if (typeof renderMathInElement !== 'undefined' && scrollRef.current) {
       renderMathInElement(scrollRef.current, {
         delimiters: [
@@ -88,18 +80,11 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
         throwOnError: false
       });
     }
-
-    // Mermaid Rendering
     if (typeof mermaid !== 'undefined' && scrollRef.current) {
-      try {
-        mermaid.init(undefined, ".mermaid");
-      } catch (e) {
-        console.error("Mermaid initialization failed", e);
-      }
+      try { mermaid.init(undefined, ".mermaid"); } catch (e) { console.error("Mermaid initialization failed", e); }
     }
   }, [messages, isUserTyping]);
 
-  // Handle clicking outside of suggestions to close them
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (inputContainerRef.current && !inputContainerRef.current.contains(event.target as Node)) {
@@ -110,85 +95,47 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInput(value);
-    setShowSuggestions(true);
-    
-    if (value.trim()) {
-      setIsUserTyping(true);
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-      typingTimeoutRef.current = setTimeout(() => {
-        setIsUserTyping(false);
-      }, 1500);
-    } else {
-      setIsUserTyping(false);
-    }
-  };
-
-  const handleSend = async (customInput?: string) => {
+  const handleSend = useCallback(async (customInput?: string) => {
     const textToSend = customInput || input;
     if (!textToSend.trim() || isLoading) return;
-
     if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     setIsUserTyping(false);
-    
     setInput('');
     setDebouncedInput('');
     setShowSuggestions(false);
     await sendMessage(textToSend, currentLanguage);
-  };
+  }, [input, isLoading, currentLanguage, sendMessage]);
 
-  const handleRetry = async () => {
+  const handleRetry = useCallback(async () => {
     if (isLoading) return;
-    
-    // Find the last user message to retry
     const userMessages = messages.filter(m => m.role === 'user');
     if (userMessages.length === 0) return;
-    
     const lastUserMsg = userMessages[userMessages.length - 1];
     await sendMessage(lastUserMsg.content, currentLanguage, true);
-  };
+  }, [isLoading, messages, currentLanguage, sendMessage]);
 
-  // Improved markdown-like text formatter for bold, italics, and lists
   const formatTextSegments = (text: string) => {
     let segments: (string | React.ReactNode)[] = [text];
-
-    // Process bold: **text**
     segments = segments.flatMap(seg => {
       if (typeof seg !== 'string') return seg;
       const parts = seg.split(/(\*\*.*?\*\*)/g);
-      return parts.map((p, i) => 
-        p.startsWith('**') && p.endsWith('**') 
-          ? <strong key={`b-${i}`} className="font-bold text-white">{p.slice(2, -2)}</strong> 
-          : p
-      );
+      return parts.map((p, i) => p.startsWith('**') && p.endsWith('**') ? <strong key={`b-${i}`} className="font-bold text-white">{p.slice(2, -2)}</strong> : p);
     });
-
-    // Process italics: *text*
     segments = segments.flatMap(seg => {
       if (typeof seg !== 'string') return seg;
       const parts = seg.split(/(\*.*?\*)/g);
-      return parts.map((p, i) => 
-        p.startsWith('*') && p.endsWith('*') 
-          ? <em key={`i-${i}`} className="italic text-slate-200">{p.slice(1, -1)}</em> 
-          : p
-      );
+      return parts.map((p, i) => p.startsWith('*') && p.endsWith('*') ? <em key={`i-${i}`} className="italic text-slate-200">{p.slice(1, -1)}</em> : p);
     });
-
     return segments;
   };
 
   const renderContent = (content: string) => {
     const parts = content.split(/(```[\s\S]*?```)/g);
-    
     return parts.map((part, index) => {
       if (part.startsWith('```')) {
         const match = part.match(/```(\w+)?\n([\s\S]*?)```/);
         const lang = match?.[1] || 'clike';
         const code = match?.[2] || '';
-        
-        // Handle Mermaid Diagrams
         if (lang === 'mermaid') {
           return (
             <div key={index} className="mermaid-wrapper my-6 p-4 bg-slate-900/40 border border-white/5 rounded-2xl overflow-x-auto flex justify-center">
@@ -196,7 +143,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
             </div>
           );
         }
-
         return (
           <div key={index} className="relative group my-4">
              <div className="absolute top-2 right-4 text-[9px] font-bold text-slate-600 uppercase tracking-widest pointer-events-none z-10">
@@ -208,35 +154,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
           </div>
         );
       }
-      
       return (
         <div key={index} className="whitespace-pre-wrap mb-4 font-light text-slate-300">
           {part.split('\n').map((line, lIdx) => {
             const trimmedLine = line.trim();
             if (trimmedLine === '') return <div key={lIdx} className="h-2" />;
-            
-            // Basic support for unordered lists
             if (trimmedLine.startsWith('* ') || trimmedLine.startsWith('- ')) {
-              return (
-                <div key={lIdx} className="flex gap-3 ml-4 mb-2">
-                  <span className="text-indigo-500 mt-1.5 flex-shrink-0">•</span>
-                  <span>{formatTextSegments(line.substring(2))}</span>
-                </div>
-              );
+              return <div key={lIdx} className="flex gap-3 ml-4 mb-2"><span className="text-indigo-500 mt-1.5 flex-shrink-0">•</span><span>{formatTextSegments(line.substring(2))}</span></div>;
             }
-            
-            // Basic support for ordered lists
             if (/^\d+\. /.test(trimmedLine)) {
-              return (
-                <div key={lIdx} className="flex gap-3 ml-4 mb-2">
-                  <span className="text-indigo-500 font-bold font-mono text-[10px] mt-1 flex-shrink-0">
-                    {trimmedLine.match(/^\d+/)?.[0]}.
-                  </span>
-                  <span>{formatTextSegments(line.replace(/^\d+\. /, ''))}</span>
-                </div>
-              );
+              return <div key={lIdx} className="flex gap-3 ml-4 mb-2"><span className="text-indigo-500 font-bold font-mono text-[10px] mt-1 flex-shrink-0">{trimmedLine.match(/^\d+/)?.[0]}.</span><span>{formatTextSegments(line.replace(/^\d+\. /, ''))}</span></div>;
             }
-
             return <p key={lIdx} className="mb-2">{formatTextSegments(line)}</p>;
           })}
         </div>
@@ -255,102 +183,17 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
         </div>
       )}
 
-      <div 
-        ref={scrollRef} 
-        className="flex-1 overflow-y-auto p-8 md:p-12 space-y-8"
-        role="log"
-        aria-live="polite"
-        aria-label="Riwayat percakapan"
-      >
-        {messages.map((msg, i) => (
-          <div key={msg.id} className={`flex items-start gap-3 md:gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`} aria-label={msg.role === 'user' ? 'Pesan Anda' : 'Pesan dari AI'}>
-            {msg.role === 'model' && (
-              <div className="flex-shrink-0 mt-1 hidden sm:block">
-                <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-black text-[10px] text-white shadow-lg shadow-indigo-500/20 border border-white/10 select-none">
-                  T
-                </div>
-              </div>
-            )}
-            <div className={`max-w-[90%] md:max-w-[85%] relative group ${
-              msg.role === 'user' 
-                ? 'bg-indigo-600 p-4 rounded-2xl text-white rounded-br-none shadow-lg' 
-                : msg.isError 
-                  ? 'bg-rose-500/10 border border-rose-500/20 p-6 rounded-2xl text-slate-300'
-                  : 'bg-transparent text-slate-300'
-            }`}>
-              {msg.role === 'model' && (
-                <div className={`text-[10px] font-bold uppercase tracking-widest mb-4 flex items-center gap-2 ${msg.isError ? 'text-rose-400' : 'text-indigo-400'}`} aria-hidden="true">
-                  <div className={`w-4 h-0.5 ${msg.isError ? 'bg-rose-500' : 'bg-indigo-500'}`}></div> 
-                  {msg.isError ? 'Link Error' : 'Architectural AI'}
-                </div>
-              )}
-              <div className={`text-sm leading-relaxed ${msg.role === 'model' ? 'font-light' : 'font-medium'}`}>
-                {msg.isLoading ? (
-                  <div className="flex gap-1.5 py-2">
-                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                ) : (
-                  renderContent(msg.content)
-                )}
-              </div>
-
-              {/* Retry Mechanism for Errors */}
-              {msg.isError && !msg.isLoading && (
-                <div className="mt-6 flex flex-wrap gap-4">
-                  <button 
-                    onClick={handleRetry}
-                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95 group/retry"
-                  >
-                    <svg className="w-3.5 h-3.5 transition-transform group-hover/retry:rotate-180 duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Retry Architectural Link
-                  </button>
-                  
-                  {msg.content.includes("Quota Exceeded") && (
-                    <button 
-                      onClick={openKeyManager}
-                      className="flex items-center gap-2 px-6 py-3 bg-white text-slate-950 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-xl hover:bg-indigo-50 active:scale-95"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                      </svg>
-                      Update API Key
-                    </button>
-                  )}
-                </div>
-              )}
-
-              {/* Feedback Mechanism */}
-              {msg.role === 'model' && !msg.isError && !msg.isLoading && (
-                <div className="mt-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Rate response:</span>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={() => handleFeedback(msg.id, 'positive')}
-                      className={`p-1.5 rounded-lg transition-all hover:scale-110 ${feedbackHistory[msg.id] === 'positive' ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-600 hover:text-indigo-400'}`}
-                      aria-label="Suka respons ini"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 10h4.708c.934 0 1.518 1.024 1.002 1.802l-3.236 4.854A2 2 0 0114.81 18H10a2 2 0 01-2-2v-4a2 2 0 01.553-1.414L11 8V3h3v7z" />
-                      </svg>
-                    </button>
-                    <button 
-                      onClick={() => handleFeedback(msg.id, 'negative')}
-                      className={`p-1.5 rounded-lg transition-all hover:scale-110 ${feedbackHistory[msg.id] === 'negative' ? 'bg-rose-500/20 text-rose-400' : 'text-slate-600 hover:text-rose-400'}`}
-                      aria-label="Tidak suka respons ini"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 14H5.292c-.934 0-1.518-1.024-1.002-1.802l3.236-4.854A2 2 0 019.19 6H14a2 2 0 012 2v4a2 2 0 01-.553 1.414L13 16v5h-3v-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+      <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 md:p-12 space-y-8" role="log" aria-live="polite" aria-label="Riwayat percakapan">
+        {messages.map((msg) => (
+          <MessageItem 
+            key={msg.id} 
+            msg={msg} 
+            renderContent={renderContent} 
+            handleRetry={handleRetry} 
+            openKeyManager={openKeyManager} 
+            handleFeedback={handleFeedback} 
+            feedbackHistory={feedbackHistory} 
+          />
         ))}
 
         {isUserTyping && (
@@ -368,92 +211,33 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ currentLanguage, i
       </div>
 
       <div className={`p-8 relative ${isLabView ? 'max-w-4xl mx-auto w-full' : 'bg-slate-800 border-t border-slate-700'}`} ref={inputContainerRef}>
-        
-        {/* Quick Start Commands - Shown only at the start of a conversation */}
         {!input.trim() && !isLoading && messages.length <= 1 && (
-          <div className="flex gap-3 overflow-x-auto no-scrollbar pb-6 px-2 -mx-2">
-            {(SUGGESTIONS[currentLanguage] || SUGGESTIONS["General"]).map((suggestion, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSend(suggestion)}
-                className="whitespace-nowrap px-5 py-3 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 text-[10px] font-black text-indigo-400/70 hover:text-indigo-400 hover:border-indigo-500/40 hover:bg-indigo-500/10 transition-all uppercase tracking-[0.15em] flex-shrink-0 shadow-sm"
-              >
-                <span className="flex items-center gap-2">
-                  <svg className="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  {suggestion}
-                </span>
-              </button>
-            ))}
-          </div>
+          <QuickActionPills suggestions={SUGGESTIONS[currentLanguage] || SUGGESTIONS["General"]} handleSend={handleSend} />
         )}
 
-        {/* Auto-Suggestions Panel */}
-        {showSuggestions && filteredSuggestions.length > 0 && (
-          <div className="absolute bottom-full left-8 right-8 mb-4 bg-[#0c0e1a]/95 backdrop-blur-2xl border border-indigo-500/30 rounded-2xl shadow-2xl overflow-hidden animate-fadeIn z-[100]">
-            <div className="px-4 py-3 bg-slate-900/50 border-b border-white/5 flex items-center justify-between">
-              <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em]">Saran Architectural Link</span>
-              <span className="text-[8px] text-slate-600 font-mono">Select to ask</span>
-            </div>
-            <div className="flex flex-col">
-              {filteredSuggestions.map((suggestion, sIdx) => (
-                <button
-                  key={sIdx}
-                  onClick={() => handleSend(suggestion)}
-                  className="w-full text-left px-5 py-4 text-xs text-slate-300 hover:text-white hover:bg-indigo-600/10 transition-all border-b border-white/5 last:border-0 group/sugg"
-                >
-                  <span className="flex items-center gap-3">
-                    <svg className="w-3 h-3 text-indigo-500 group-hover/sugg:scale-125 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    {suggestion}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <ChatAutocomplete filteredSuggestions={filteredSuggestions} handleSend={handleSend} />
 
-        <div className="relative group">
-          <input
-            type="text"
-            value={input}
-            onChange={handleInputChange}
-            onFocus={() => setShowSuggestions(true)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            aria-label={`Diskusikan arsitektur ${currentLanguage}`}
-            placeholder={`Diskusikan arsitektur ${currentLanguage}...`}
-            className="w-full bg-slate-900 border border-slate-800 text-slate-200 text-sm rounded-2xl px-6 py-5 pr-16 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all shadow-2xl group-hover:border-slate-700"
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 group">
-            <button
-              onClick={() => handleSend()}
-              disabled={isLoading}
-              aria-label="Kirim pesan"
-              className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 text-white p-3 rounded-xl transition-all shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 relative"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className="h-5 w-5 rotate-90" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-              </svg>
-            </button>
-            <div className="premium-tooltip bottom-full right-0 mb-4">Kirim ke Architectural Mentor</div>
-          </div>
-        </div>
+        <ChatInputArea 
+          input={input} 
+          setInput={(val) => {
+            setInput(val);
+            if (val.trim()) {
+              setIsUserTyping(true);
+              if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+              typingTimeoutRef.current = setTimeout(() => setIsUserTyping(false), 1500);
+            } else { setIsUserTyping(false); }
+          }} 
+          isLoading={isLoading} 
+          handleSend={handleSend} 
+          setShowSuggestions={setShowSuggestions} 
+          currentLanguage={currentLanguage} 
+        />
+        
         <p className="text-center text-[10px] text-slate-600 font-mono mt-4 uppercase tracking-widest" aria-hidden="true">
            Secure Lab Environment – End-to-End Encryption Enabled
         </p>
       </div>
-
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-      `}</style>
+      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>
     </div>
   );
 };
