@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { LanguageType } from '../types';
 import { FloatingHeader } from '../components/landing/FloatingHeader';
 import { HeroSection } from '../components/landing/HeroSection';
@@ -158,12 +158,35 @@ const LandingPage: React.FC = () => {
   const [activeRoadmap, setActiveRoadmap] = useState<LanguageType>(LanguageType.ZIG);
   const [heroTextIdx, setHeroTextIdx] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+  const { pathname } = useLocation();
 
   const heroTexts = [
     { title: "Bukan Mengganti,", subtitle: "Mendefinisikan Ulang." },
     { title: "Evolusi Kode,", subtitle: "Arsitektur Spasial." },
     { title: "Presisi Runtime,", subtitle: "Efisiensi Tanpa Batas." }
   ];
+
+  const scrollTo = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  useEffect(() => {
+    // Handle Direct Hash / Path navigation for Pricing
+    if (pathname === '/pricing') {
+      // Delay slightly to ensure component is fully rendered
+      setTimeout(() => scrollTo('pricing'), 100);
+    }
+  }, [pathname]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -180,20 +203,6 @@ const LandingPage: React.FC = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-
-  const scrollTo = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      const offset = 80;
-      const elementPosition = element.getBoundingClientRect().top;
-      const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: "smooth"
-      });
-    }
-  };
 
   return (
     <div className="animate-fadeIn selection:bg-indigo-500/30 bg-slate-950">

@@ -12,9 +12,18 @@ interface FloatingHeaderProps {
 export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, activeRoadmap, scrollTo }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const isHome = location.pathname === '/';
+  const isHome = location.pathname === '/' || location.pathname === '/pricing';
 
   const handleNavClick = (id: string) => {
+    if (id === 'pricing') {
+      if (isHome) {
+        scrollTo('pricing');
+      } else {
+        navigate('/pricing');
+      }
+      return;
+    }
+
     if (isHome && id !== 'vision' && id !== 'blueprints' && id !== 'setup') {
       scrollTo(id);
     } else {
@@ -43,6 +52,7 @@ export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, active
           {[
             { label: 'Visi 2030', id: 'vision' },
             { label: 'Blueprints', id: 'blueprints' },
+            { label: 'Pricing', id: 'pricing' },
             { label: 'Setup Env', id: 'setup' }
           ].map((item) => (
             <button 
@@ -50,11 +60,11 @@ export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, active
               onClick={() => handleNavClick(item.id)} 
               data-tooltip={`Buka ${item.label}`}
               className={`relative text-[10px] font-bold uppercase tracking-[0.2em] transition-all group ${
-                location.pathname.includes(item.id) ? 'text-indigo-400' : 'text-slate-400 hover:text-white'
+                (location.pathname.includes(item.id) || (item.id === 'pricing' && location.pathname === '/pricing')) ? 'text-indigo-400' : 'text-slate-400 hover:text-white'
               }`}
             >
               {item.label}
-              <span className={`absolute -bottom-1 left-0 h-[1px] bg-indigo-500 transition-all duration-300 ${location.pathname.includes(item.id) ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+              <span className={`absolute -bottom-1 left-0 h-[1px] bg-indigo-500 transition-all duration-300 ${ (location.pathname.includes(item.id) || (item.id === 'pricing' && location.pathname === '/pricing')) ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
             </button>
           ))}
         </div>

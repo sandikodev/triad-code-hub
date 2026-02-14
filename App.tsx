@@ -11,7 +11,10 @@ import { AuthProvider } from './context/AuthContext';
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Only scroll to top if we are not navigating to pricing section
+    if (pathname !== '/pricing') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, [pathname]);
   return null;
 };
@@ -88,6 +91,7 @@ const App: React.FC = () => {
           <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-indigo-500/30">
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/pricing" element={<LandingPage />} />
               <Route path="/setup" element={<SetupPage />} />
               <Route path="/blueprints" element={<BlueprintsPage />} />
               <Route path="/vision" element={<FuturePage />} />
