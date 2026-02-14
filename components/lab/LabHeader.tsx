@@ -2,7 +2,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LanguageType } from '../../types';
-import { LANGUAGES } from '../../constants';
+import { WorkspaceSwitcher } from './header/WorkspaceSwitcher';
+import { AIStatusIndicator } from './header/AIStatusIndicator';
 
 interface LabHeaderProps {
   currentLang: LanguageType;
@@ -28,37 +29,11 @@ export const LabHeader: React.FC<LabHeaderProps> = ({ currentLang, handleLangCha
           <div className="premium-tooltip">Keluar dari Lab</div>
         </div>
         <div className="h-6 w-[1px] bg-slate-800" aria-hidden="true"></div>
-        <nav className="flex items-center gap-3" aria-label="Pemilihan Bahasa Pemrograman">
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-widest" id="workspace-label">Workspace:</span>
-          <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800" role="group" aria-labelledby="workspace-label">
-            {LANGUAGES.map(l => (
-              <div key={l.id} className="relative group">
-                <button
-                  onClick={() => handleLangChange(l.id as LanguageType)}
-                  aria-pressed={currentLang === l.id}
-                  className={`px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-tighter transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
-                    currentLang === l.id 
-                      ? 'bg-indigo-600 text-white shadow-lg' 
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  {l.name}
-                </button>
-                <div className="premium-tooltip">Ganti ke {l.name}</div>
-              </div>
-            ))}
-          </div>
-        </nav>
+        
+        <WorkspaceSwitcher currentLang={currentLang} handleLangChange={handleLangChange} />
       </div>
-      <div className="flex items-center gap-4">
-         <div className="relative group">
-           <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full cursor-help" role="status" aria-label="Status AI: Aktif">
-              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest">AI Link: Active</span>
-           </div>
-           <div className="premium-tooltip">Koneksi ke Gemini 3 Pro Stabil</div>
-         </div>
-      </div>
+
+      <AIStatusIndicator />
     </header>
   );
 };

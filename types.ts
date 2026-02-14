@@ -38,3 +38,15 @@ export interface ChatMessage {
   isError?: boolean;
   isLoading?: boolean;
 }
+
+export type BlueprintCategory = 'High Throughput' | 'Fault Tolerance' | 'Low Latency' | 'Real-time';
+
+export interface Blueprint {
+  id: string;
+  title: string;
+  category: BlueprintCategory;
+  languages: LanguageType[];
+  description: string;
+  stats: { label: string; value: string }[];
+  difficulty: 'Architect' | 'Senior' | 'Lead';
+}

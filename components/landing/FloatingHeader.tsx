@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { LanguageType } from '../../types';
 
 interface FloatingHeaderProps {
@@ -11,6 +11,20 @@ interface FloatingHeaderProps {
 
 export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, activeRoadmap, scrollTo }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
+  const handleNavClick = (id: string) => {
+    if (isHome) {
+      scrollTo(id);
+    } else {
+      navigate('/');
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  };
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ease-in-out px-4 md:px-12 py-6 ${
@@ -40,7 +54,7 @@ export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, active
           ].map((item) => (
             <button 
               key={item.label}
-              onClick={() => scrollTo(item.id)} 
+              onClick={() => handleNavClick(item.id)} 
               className="relative text-[10px] font-bold text-slate-400 hover:text-white uppercase tracking-[0.2em] transition-colors group"
             >
               {item.label}
@@ -48,10 +62,21 @@ export const FloatingHeader: React.FC<FloatingHeaderProps> = ({ scrolled, active
             </button>
           ))}
           <div className="h-4 w-[1px] bg-white/10 mx-2"></div>
+          
+          <div className="relative group">
+            <button 
+              onClick={() => navigate('/blueprints')}
+              className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${location.pathname === '/blueprints' ? 'text-indigo-400' : 'text-slate-400 hover:text-white'}`}
+            >
+              Blueprints
+            </button>
+            <div className="premium-tooltip">Katalog Arsitektur Sistem</div>
+          </div>
+
           <div className="relative group">
             <button 
               onClick={() => navigate('/setup')}
-              className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-[0.2em] transition-all hover:tracking-[0.3em]"
+              className={`text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${location.pathname === '/setup' ? 'text-indigo-400' : 'text-slate-400 hover:text-white'}`}
             >
               Setup Env
             </button>
